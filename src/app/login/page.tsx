@@ -84,6 +84,7 @@ export default function Page() {
         <div>
             <ToastContainer/>
             <div className="relative top-24 left-[15%]">
+                <Image src="/logo.png" width="65" height="65" className="absolute z-20 animate-bounce right-[32%] bottom-[-6vh]" alt="logo"/>
                 <div id="loginContainer"
                      className="absolute flex flex-row w-4/6 shadow-xl drop-shadow-lg rounded-2xl h-[65vh]">
                     <div
@@ -161,7 +162,6 @@ export default function Page() {
                         </div>
                     </div>
                 </div>
-                <Image src="/logo.png" width="65" height="65" className="absolute animate-bounce right-[32%] bottom-[-6vh]" alt="logo"/>
                 <div id="registerContainer"
                      className="absolute flex flex-row w-4/6 shadow-xl drop-shadow-lg rounded-2xl invisible h-[65vh]">
                     <div

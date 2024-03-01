@@ -1,20 +1,16 @@
 "use client";
-
-import {BrowserRouter as Router, Routes, Route, Navigate} from "react-router-dom";
+import {useRouter} from 'next/navigation';
 
 export default function Home() {
+    //Variables
+    const {push} = useRouter();
+    const isLoggedIn = !!(localStorage.getItem('token')!)
+
     return (
         <>
-            <Router>
-                <Routes>
-                    <Route
-                        path="/"
-                        element={
-                            <Navigate replace={true} to="/login"/>
-                        }
-                    />
-                </Routes>
-            </Router>
+            {
+                isLoggedIn ? (push('/dashboard')) : (push('/login'))
+            }
         </>
     );
 }

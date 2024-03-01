@@ -1,3 +1,9 @@
+export type jwtUserData = {
+    userData: RegisteredUserData,
+    iat: number,
+    exp: number
+}
+
 export type RegisteredUserData = {
     createdAt: string,
     date_of_birth: null | string,

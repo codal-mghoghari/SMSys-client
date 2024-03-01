@@ -17,7 +17,11 @@ const config: Config = {
             backgroundImage: {
                 'custom-pattern':
                     "linear-gradient(to right, #FF4B2B, #FF416C)",
+                'courseImage': "url('/course-pic.jpg')",
             },
+            colors: {
+                "custom-primary": "#1F2937"
+            }
         },
     },
     plugins: [],

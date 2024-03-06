@@ -1,38 +1,15 @@
 "use client";
 import {useState} from "react";
 import {Formik, FormikValues} from "formik";
-import {LoginSchema, LoginType} from "../../../schema/LoginSchema";
-import {RegisterSchema, RegisterType} from "../../../schema/RegisterSchema";
-import {loginUser, registerUser} from "../../../controller/userController";
-import {Slide, toast, ToastContainer} from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import {LoginSchema, LoginType} from "@/schema/LoginSchema";
+import {RegisterSchema, RegisterType} from "@/schema/RegisterSchema";
+import {loginUser, registerUser} from "@/controller/userController";
 import Image from "next/image";
 import {useRouter} from 'next/navigation';
+import {notifySuccess, notifyError, createCookie, getCooki} from "@/util/Common";
+import {useDispatch} from "react-redux";
+import {_setUser} from "../../../redux/store/slices/userReducer";
 
-
-const notifySuccess = (args: string) => toast.success(args, {
-    toastId: "toast-success_notification",
-    position: "top-right",
-    autoClose: 3000,
-    hideProgressBar: true,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    theme: "colored",
-    transition: Slide,
-});
-
-const notifyError = (args: string) => toast.error(args, {
-    toastId: "toast-error_notification",
-    position: "top-right",
-    autoClose: 3000,
-    hideProgressBar: true,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    theme: "colored",
-    transition: Slide,
-});
 
 export default function Page() {
     // States
@@ -40,7 +17,8 @@ export default function Page() {
 
     // Variables
     const {push} = useRouter();
-    const isLoggedIn = !!(localStorage.getItem('token')!)
+    const dispatch = useDispatch();
+    const isLoggedIn = !!(getCooki('token'))
 
     const handleSignUp = () => {
         const loginContainer = (document.getElementById("loginContainer") as HTMLElement);
@@ -61,10 +39,12 @@ export default function Page() {
         loginUser(email, password).then((res) => {
             if (res.data) {
                 notifySuccess(res.message)
-                if(!isLoggedIn){ // If localStorage already has token, it will not re-set it.
-                    localStorage.setItem('token', res.data.token)
-                }
-                // createCookie("token", res.data.token, 1440)
+                console.log(res.data.user)
+                dispatch(_setUser(res.data.user))
+                // if(!isLoggedIn){ // If localStorage already has token, it will not re-set it.
+                //     localStorage.setItem('token', res.data.token)
+                // }
+                createCookie("token", res.data.token, 1440)
                 push('/dashboard')
             } else {
                 notifyError(res.message)
@@ -90,7 +70,6 @@ export default function Page() {
             {
                 isLoggedIn ? (push('/dashboard')) : (
                     <>
-                        <ToastContainer/>
                         <div className="relative top-24 left-[15%]">
                             <Image src="/logo.png" width="65" height="65"
                                    className="absolute z-20 animate-bounce right-[32%] bottom-[-6vh]" alt="logo"/>

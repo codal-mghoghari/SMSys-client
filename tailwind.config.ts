@@ -20,7 +20,11 @@ const config: Config = {
                 'courseImage': "url('/course-pic.jpg')",
             },
             colors: {
-                "custom-primary": "#1F2937"
+                "custom-primary": "#1F2937",
+                "custom-border-primary": "#1F2937"
+            },
+            textColor: {
+                "custom-primary": "#4b5563",
             }
         },
     },

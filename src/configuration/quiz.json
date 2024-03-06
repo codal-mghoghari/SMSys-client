@@ -1,0 +1,208 @@
+[
+  {
+    "categories": [
+      "Javascript",
+      "Typescript",
+      "cSharp",
+      "Java"
+    ],
+    "questions": [
+      {
+        "questions": [
+          {
+            "id": 1,
+            "type": "Javascript",
+            "question": "Which one of the following is not a Javascript Data Type?",
+            "answerOptions": [
+              {
+                "id": 1,
+                "answer": "WRONGs"
+              },
+              {
+                "id": 2,
+                "answer": "WRONGx"
+              },
+              {
+                "id": 3,
+                "answer": "ANSWER",
+                "isCorrect": true
+              },
+              {
+                "id": 4,
+                "answer": "WRONGxx"
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "type": "Javascript",
+            "question": "Which one of the following is a Javascript Data Type?",
+            "answerOptions": [
+              {
+                "id": 1,
+                "answer": "WRONG2"
+              },
+              {
+                "id": 2,
+                "answer": "WRONG"
+              },
+              {
+                "id": 3,
+                "answer": "ANSWER",
+                "isCorrect": true
+              },
+              {
+                "id": 4,
+                "answer": "WRONG"
+              }
+            ]
+          },
+          {
+            "id": 3,
+            "type": "Javascript",
+            "question": "Which symbol is used in Javascript for commenting?",
+            "answerOptions": [
+              {
+                "id": 1,
+                "answer": "WRONG3"
+              },
+              {
+                "id": 2,
+                "answer": "WRONG"
+              },
+              {
+                "id": 3,
+                "answer": "ANSWER",
+                "isCorrect": true
+              },
+              {
+                "id": 4,
+                "answer": "WRONG"
+              }
+            ]
+          },
+          {
+            "id": 4,
+            "type": "Typescript",
+            "question": "Which one of the following is not a Typescript Data Type?",
+            "answerOptions": [
+              {
+                "id": 1,
+                "answer": "WRONGTS"
+              },
+              {
+                "id": 2,
+                "answer": "WRONG"
+              },
+              {
+                "id": 3,
+                "answer": "ANSWER",
+                "isCorrect": true
+              },
+              {
+                "id": 4,
+                "answer": "WRONG"
+              }
+            ]
+          },
+          {
+            "id": 5,
+            "type": "Typescript",
+            "question": "Which one of the following is a Typescript Data Type?",
+            "answerOptions": [
+              {
+                "id": 1,
+                "answer": "WRONG"
+              },
+              {
+                "id": 2,
+                "answer": "WRONG"
+              },
+              {
+                "id": 3,
+                "answer": "ANSWER",
+                "isCorrect": true
+              },
+              {
+                "id": 4,
+                "answer": "WRONG"
+              }
+            ]
+          },
+          {
+            "id": 6,
+            "type": "Typescript",
+            "question": "Which symbol is used in Typescript for commenting?",
+            "answerOptions": [
+              {
+                "id": 1,
+                "answer": "WRONG"
+              },
+              {
+                "id": 2,
+                "answer": "WRONG"
+              },
+              {
+                "id": 3,
+                "answer": "ANSWER",
+                "isCorrect": true
+              },
+              {
+                "id": 4,
+                "answer": "WRONG"
+              }
+            ]
+          },
+          {
+            "id": 7,
+            "type": "Typescript",
+            "question": "Which symbol is used in Typescript for commenting?",
+            "answerOptions": [
+              {
+                "id": 1,
+                "answer": "WRONG"
+              },
+              {
+                "id": 2,
+                "answer": "WRONG"
+              },
+              {
+                "id": 3,
+                "answer": "ANSWER",
+                "isCorrect": true
+              },
+              {
+                "id": 4,
+                "answer": "WRONG"
+              }
+            ]
+          },
+          {
+            "id": 8,
+            "type": "Typescript",
+            "question": "Which symbol is used in Typescript for commenting?",
+            "answerOptions": [
+              {
+                "id": 1,
+                "answer": "WRONG"
+              },
+              {
+                "id": 2,
+                "answer": "WRONG"
+              },
+              {
+                "id": 3,
+                "answer": "ANSWER",
+                "isCorrect": true
+              },
+              {
+                "id": 4,
+                "answer": "WRONG"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

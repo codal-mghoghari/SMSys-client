@@ -1,7 +1,8 @@
 import axios, {AxiosError, AxiosResponse} from "axios";
+import {getCooki} from "@/util/Common";
 
 const Client = axios.create({
-    headers: {"Content-Type": "application/json"}
+    headers: {"Content-Type": "application/json", "Authorization": "Bearer " + getCooki('token')},
 })
 
 export const registerUser = async (first_name: string, last_name: string, email: string, password: string) => {
@@ -46,4 +47,24 @@ export const loginUser = async (email: string, password: string) => {
         })
 }
 
-export default registerUser
+
+export const updateUserCourse = async (data: { js: boolean, ts: boolean, cSharp: boolean, java: boolean }, id: number) => {
+    return await Client.put(`http://localhost:8000/api/user/${id}`, {
+        optedCourses: JSON.stringify(data)
+    })
+        .then(
+            (response: AxiosResponse) => {
+                return response.data
+            }
+        )
+        .catch((error) => {
+            if (error.response.status === 400) {
+                return error.response.data
+            } else if(error.response.status === 404) {
+                return error.response.data
+            } else {
+                console.log(error)
+                return error
+            }
+        })
+}

@@ -1,10 +1,11 @@
 "use client";
 import {useRouter} from 'next/navigation';
+import {getCooki} from "@/util/Common";
 
 export default function Home() {
     //Variables
     const {push} = useRouter();
-    const isLoggedIn = !!(localStorage.getItem('token')!)
+    const isLoggedIn = !!(getCooki('token')!)
 
     return (
         <>

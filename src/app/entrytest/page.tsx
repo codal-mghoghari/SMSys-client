@@ -13,7 +13,6 @@ export default function Home() {
     //Global
     const quizSelector: StringIndexable = useSelector((state: rootStateType) => state.quiz.quizData);
 
-
     //Variables
     const dispatch = useDispatch();
     const {push} = useRouter();
@@ -34,7 +33,7 @@ export default function Home() {
                             quizSelector.isStarted ? (<QuizUi/>) : (
                                 <div className="flex flex-col items-center justify-center gap-6">
                                     <h1 className="text-center text-black text-[50px] font-bold tracking-[0.5px]">
-                                        Welcome to QuizApp!
+                                        Welcome to Quiz!
                                     </h1>
                                     <p className="text-center w-[90%]">
                                         You are going to see few questions and based on the answer, the marks will be

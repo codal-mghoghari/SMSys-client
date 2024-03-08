@@ -14,6 +14,7 @@ import {rootStateType} from "../../redux/store/mainStore";
 import {toast} from "react-toastify";
 import {notifySuccess} from "@/util/Common";
 import SubmitDialog from "@/components/SubmitDialog";
+import genRecommendedCourses from "@/util/genRecommendedCourses";
 
 type RootQuestions = {
     categories: Array<string>,
@@ -24,7 +25,7 @@ type Questions = {
     Questions: Array<CategoryQuestions>,
 }
 
-type CategoryQuestions = {
+export type CategoryQuestions = {
     id: number,
     type: string,
     question: string,
@@ -41,29 +42,33 @@ type eachQuestion = {
 
 export const QuizUi = () => {
     //Global
-    const questionsSelector: StringIndexable = useSelector((state: rootStateType) => state.quiz.quizData.questions);
+    const answeredSelector: StringIndexable = useSelector((state: rootStateType) => state.quiz.quizData.answeredQuestions);
     const unAnsweredSelector: StringIndexable = useSelector((state: rootStateType) => state.quiz.quizData.unAnsweredQuestions);
 
 
     //States
     const [pageSize, setPageSize] = useState<number>(1);
     const [pageNumber, setPageNumber] = useState<number>(1);
+    const [unAnsweredPlaceholderText, setUnAnsweredPlaceholderText] = useState<string>("");
     const [dialogBool, setDialogBool] = useState({bool: false, elem: ""})
 
 
     //Variables
     const dispatch = useDispatch();
-    const unAnsweredLength = Object.keys(unAnsweredSelector).length
     const quizCategories = quizData.map((quiz) => {
         return quiz.questions[0]
     })
     const Questions: CategoryQuestions = quizCategories.map((quiz) => {
         return quiz.questions
     })
-
-    const jsOptions = (qIndex: number) => Questions.map((quiz) => {
+    const ansOptions = (qIndex: number) => Questions.map((quiz) => {
         return quiz[qIndex].answerOptions
     })
+
+    const answeredQuestionsLen = Object.keys(answeredSelector).length
+    const unAnsweredQuestionsLen = Object.keys(unAnsweredSelector).length
+    const totalQuestionsLen = Questions[0].length
+
 
     const handlePrevious = () => {
         const options = (document.getElementsByName('option') as NodeListOf<HTMLInputElement>)
@@ -124,7 +129,7 @@ export const QuizUi = () => {
         const selectedOpt = e.target.value
         const selectedOptName = e.target.id
         dispatch(_updateQuizData({
-            ...questionsSelector,
+            ...answeredSelector,
             [selectedOptName]: selectedOpt
         }))
         if (unAnsweredSelector[`q${pageNumber}`]) {
@@ -133,6 +138,12 @@ export const QuizUi = () => {
     }
 
     const handleSubmit = () => {
+        if (answeredQuestionsLen === 0) {
+            setUnAnsweredPlaceholderText(totalQuestionsLen.toString())
+        } else {
+            let leftToAttempt = totalQuestionsLen - answeredQuestionsLen
+            setUnAnsweredPlaceholderText(leftToAttempt.toString())
+        }
         setDialogBool({bool: true, elem: ""})
     }
 
@@ -147,21 +158,14 @@ export const QuizUi = () => {
         setDialogBool({bool: false, elem: "confirm"})
     }
 
-    const handleFormSubmit = () => {
-
+    const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        genRecommendedCourses({unAnsweredSelector, answeredSelector, Questions})
     }
 
 
     return (
         <>
-            {
-                dialogBool.bool && (
-                    <SubmitDialog title={"Submit"}
-                                  message={`Are you sure, you want to submit? Unanswered Questions: ${unAnsweredLength}`}
-                                  button={"Confirm"} onConfirm={handleOnConfirmSubmit} onCancel={handleOnCancelSubmit}
-                                  loader={dialogBool}/>
-                )
-            }
             <div className="flex flex-row items-center justify-end  text-center w-full flex-wrap">
                 <div className="flex gap-2 w-32 flex-wrap">
                     {Questions[0].map((question, index: React.Key) => (
@@ -181,7 +185,15 @@ export const QuizUi = () => {
                    text-custom-primary text-center">
                 {defaultConfig.websiteTitle}
             </h1>
-            <form onSubmit={handleFormSubmit} id="quizForm" className="space-y-4">
+            <form onSubmit={(e) => handleFormSubmit(e)} id="quizForm" className="space-y-4">
+                {
+                    dialogBool.bool && (
+                        <SubmitDialog title={"Submit"}
+                                      message={`Are you sure, you want to submit? \nUnanswered Questions: ${unAnsweredPlaceholderText}`}
+                                      button={"Confirm"} onConfirm={handleOnConfirmSubmit} onCancel={handleOnCancelSubmit}
+                                      loader={dialogBool}/>
+                    )
+                }
                 <div className="flex flex-col mb-4">
                     {
                         paginate(Questions[0], pageSize, pageNumber).map((question: eachQuestion, index: React.Key) => {
@@ -206,7 +218,7 @@ export const QuizUi = () => {
                                     <label className="text-lg text-gray-800 mb-2">
                                         {question.question}
                                     </label>
-                                    {jsOptions(pageNumber - 1)[0].map((
+                                    {ansOptions(pageNumber - 1)[0].map((
                                         option: {
                                             id: number,
                                             answer: string,
@@ -220,7 +232,7 @@ export const QuizUi = () => {
                                                            name="option" type="radio"
                                                            value={option.answer}
                                                            checked={
-                                                               questionsSelector[question.id] === option.answer
+                                                               answeredSelector[question.id] === option.answer
                                                            }
                                                            onChange={e => handleSelect(e)}
                                                            className="w-4 h-4 text-blue-600 bg-custom-primary border-gray-800 focus:outline-0"

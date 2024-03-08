@@ -5,7 +5,7 @@ import {StringIndexable} from "@/util/Util";
 const initialState = {
     quizData: {
         isStarted: false,
-        questions: {},
+        answeredQuestions: {},
         unAnsweredQuestions: {},
     }
 }
@@ -21,10 +21,10 @@ export const quizSlice = createSlice({
             state.quizData = action.payload
         },
         _updateQuizData: (state, action: { payload: any, type: string }) => {
-            state.quizData.questions = action.payload
+            state.quizData.answeredQuestions = action.payload
         },
         _resetQuizQuestions: (state) => {
-            state.quizData.questions = {}
+            state.quizData.answeredQuestions = {}
         },
         _setUnAnsweredQuestions: (state, action: { payload: any, type: string }) => {
             state.quizData.unAnsweredQuestions = action.payload

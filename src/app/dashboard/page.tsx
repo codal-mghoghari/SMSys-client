@@ -13,13 +13,8 @@ import {useDispatch, useSelector} from "react-redux";
 import {rootStateType} from "../../../redux/store/mainStore";
 import {_setUserCourses} from "../../../redux/store/slices/userReducer";
 import defaultConfig from "../../configuration/defaultConfig.json"
-
-type optedCourse = {
-    js: boolean,
-    ts: boolean,
-    cSharp: boolean,
-    java: boolean,
-}
+import "./page.css"
+import {StringIndexable} from "@/util/Util";
 
 export default function Page() {
     //Global preload
@@ -29,7 +24,7 @@ export default function Page() {
 
     //Local States
     const [activeElem, setActiveElem] = useState("user");
-    const [optedCourses, setOptedCourses] = useState<optedCourse>(userDataSelector.optedCourses === undefined ? ({}) : (JSON.parse(userDataSelector.optedCourses!)));
+    const [optedCourses, setOptedCourses] = useState(userDataSelector.optedCourses === undefined ? ({}) : (JSON.parse(userDataSelector.optedCourses!)));
 
     //Variables
     const {userData}: jwtUserData = jwtDecode(getCooki('token')!);
@@ -62,11 +57,11 @@ export default function Page() {
     }
 
     useEffect(() => {
-        if(!isLoggedIn){ //Check if user has token in their cookie, if not it shall be logged out.
+        if (!isLoggedIn) { //Check if user has token in their cookie, if not it shall be logged out.
             push('/login')
         }
 
-        let inputElements = (document.getElementById('opt-course-container') as HTMLElement).getElementsByTagName('input')
+        let inputElements: StringIndexable = (document.getElementById('opt-course-container') as HTMLElement).getElementsByTagName('input')
         for (let i = 0; i < inputElements.length; i++) {
             inputElements[i].checked = Object.values(optedCourses)[i]
         }
@@ -127,10 +122,8 @@ export default function Page() {
                                 <DashboardContent
                                     userData={userDataSelector}
                                     active={activeElem}
-                                    jsHandler={(e) => tickHandler(e)}
-                                    tsHandler={(e) => tickHandler(e)}
-                                    cSharpHandler={(e) => tickHandler(e)}
-                                    javaHandler={(e) => tickHandler(e)}/>
+                                    clickHandler={(e) => tickHandler(e)}
+                                />
                                 <div id="saveOptedCourses"
                                      className="flex flex-row items-center justify-end absolute bottom-0 bg-gray-300 w-full h-16 z-20 rounded invisible opacity-90
                                      transition-all duration-300 ease-in-out

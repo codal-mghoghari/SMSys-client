@@ -9,7 +9,7 @@ import {useRouter} from 'next/navigation';
 import {notifySuccess, notifyError, createCookie, getCooki} from "@/util/Common";
 import {useDispatch} from "react-redux";
 import {_setUser} from "../../../redux/store/slices/userReducer";
-
+import './page.css'
 
 export default function Page() {
     // States
@@ -23,13 +23,34 @@ export default function Page() {
     const handleSignUp = () => {
         const loginContainer = (document.getElementById("loginContainer") as HTMLElement);
         const registerContainer = (document.getElementById("registerContainer") as HTMLElement);
+        const rightPanel = (document.getElementById("rightPanel") as HTMLElement);
+        const leftPanel = (document.getElementById("leftPanel") as HTMLElement);
         if (uiBool) {
-            registerContainer.classList.remove("invisible");
+            registerContainer.classList.add("goFullRight");
+
             loginContainer.classList.add("invisible");
+            registerContainer.classList.remove("invisible");
+
+            loginContainer.classList.add("goFullLeft");
+
+            leftPanel.classList.add("goFullLeft");
+
+            rightPanel.classList.add("invisible");
+            leftPanel.classList.remove("invisible");
             setUiBool(false);
         } else {
-            registerContainer.classList.add("invisible");
+            registerContainer.classList.remove("goFullRight");
+
             loginContainer.classList.remove("invisible");
+            registerContainer.classList.add("invisible");
+
+            loginContainer.classList.remove("goFullLeft");
+
+
+            leftPanel.classList.remove("goFullLeft");
+
+            rightPanel.classList.remove("invisible");
+            leftPanel.classList.add("invisible");
             setUiBool(true);
         }
     }
@@ -70,13 +91,12 @@ export default function Page() {
             {
                 isLoggedIn ? (push('/dashboard')) : (
                     <>
-                        <div className="relative top-24 left-[15%]">
+                        <div className="relative top-24 left-[15%] w-[100%] bg-red-600 rounded-2xl shadow-xl drop-shadow-lg">
                             <Image src="/logo.png" width="65" height="65"
-                                   className="absolute z-20 animate-bounce right-[32%] bottom-[-6vh]" alt="logo"/>
-                            <div id="loginContainer"
-                                 className="absolute flex flex-row w-4/6 shadow-xl drop-shadow-lg rounded-2xl h-[65vh]">
-                                <div
-                                    className="flex flex-col bg-white w-2/4 text-center p-10 justify-center items-center rounded-l-2xl">
+                                   className="absolute z-[100] animate-bounce right-[32%] bottom-[-6vh]" alt="logo"/>
+                            <div id="loginContainer" className="absolute flex flex-row w-4/6 h-[65vh] z-20">
+                                <div id="login"
+                                    className="flex flex-col bg-white w-2/4 text-center p-10 justify-center items-center">
                                     <Formik validationSchema={LoginSchema}
                                             initialValues={{email: "", password: ""}}
                                             enableReinitialize={true}
@@ -136,38 +156,10 @@ export default function Page() {
                                         )}
                                     </Formik>
                                 </div>
-                                <div
-                                    className="flex flex-col bg-custom-primary w-2/4 text-center p-10 justify-center items-center rounded-r-2xl">
-                                    <div className="flex flex-col text-center gap-5 justify-center items-center">
-                                        <span className="text-white text-xl font-bold">Hello, Friend!</span>
-                                        <span
-                                            className="text-white text-sm">Enter your personal details and start the journey with us</span>
-                                        <button
-                                            onClick={handleSignUp}
-                                            type="button"
-                                            className="cursor-pointer rounded-full w-2/3 text-xs text-white border border-solid border-white font-bold py-3 px-2 tracking-wider uppercase transition-transform duration-[80ms] ease-in active:scale-[0.95]">Register
-                                            now!
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
-                            <div id="registerContainer"
-                                 className="absolute flex flex-row w-4/6 shadow-xl drop-shadow-lg rounded-2xl invisible h-[65vh]">
-                                <div
-                                    className="flex flex-col bg-custom-primary w-2/4 text-center p-10 justify-center items-center rounded-l-2xl">
-                                    <div className="flex flex-col text-center gap-5 justify-center items-center">
-                                        <span className="text-white text-xl font-bold">Welcome Back!</span>
-                                        <span
-                                            className="text-white text-sm">If you already have account registered, you can login here:</span>
-                                        <button
-                                            onClick={handleSignUp}
-                                            type="button"
-                                            className="rounded-full w-2/5 text-xs text-white border border-solid border-white font-bold py-3 px-2 tracking-wider uppercase transition-transform duration-[80ms] ease-in active:scale-[0.95]">Login
-                                        </button>
-                                    </div>
-                                </div>
-                                <div
-                                    className="flex flex-col bg-white w-2/4 text-center p-10 justify-center items-center rounded-r-2xl">
+                            <div id="registerContainer" className="absolute flex flex-row w-4/6 h-[65vh] z-10">
+                                <div id="register"
+                                    className="flex flex-col bg-white w-2/4 text-center p-10 justify-center items-center">
                                     <Formik validationSchema={RegisterSchema}
                                             initialValues={{reg_full_name: "", reg_email: "", reg_password: ""}}
                                             enableReinitialize={true}
@@ -233,6 +225,35 @@ export default function Page() {
                                             </form>
                                         )}
                                     </Formik>
+                                </div>
+                            </div>
+                            <div id="overlayContainer" className="absolute flex flex-row h-[65vh] w-4/6 right-0">
+                                <div id="rightPanel"
+                                    className="flex flex-col bg-custom-primary w-2/4 text-center z-20 p-10 justify-center items-center">
+                                    <div className="flex flex-col text-center gap-5 justify-center items-center">
+                                        <span className="text-white text-xl font-bold">Hello, Friend!</span>
+                                        <span
+                                            className="text-white text-sm">Enter your personal details and start the journey with us</span>
+                                        <button
+                                            onClick={handleSignUp}
+                                            type="button"
+                                            className="cursor-pointer rounded-full w-2/3 text-xs text-white border border-solid border-white font-bold py-3 px-2 tracking-wider uppercase transition-transform duration-[80ms] ease-in active:scale-[0.95]">Register
+                                            now!
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="leftPanel"
+                                     className="flex flex-col bg-custom-primary w-2/4 text-center z-10 p-10 justify-center items-center invisible">
+                                    <div className="flex flex-col text-center gap-5 justify-center items-center">
+                                        <span className="text-white text-xl font-bold">Welcome Back!</span>
+                                        <span
+                                            className="text-white text-sm">If you already have account registered, you can login here:</span>
+                                        <button
+                                            onClick={handleSignUp}
+                                            type="button"
+                                            className="rounded-full w-2/5 text-xs text-white border border-solid border-white font-bold py-3 px-2 tracking-wider uppercase transition-transform duration-[80ms] ease-in active:scale-[0.95]">Login
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

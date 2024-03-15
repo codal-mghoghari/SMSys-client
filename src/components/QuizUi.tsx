@@ -32,7 +32,7 @@ export type CategoryQuestions = {
     answerOptions: ({ id: number, answer: string, isCorrect?: undefined | boolean })[]
 }[][]
 
-type eachQuestion = {
+export type eachQuestion = {
     id: number,
     type: string,
     question: string,
@@ -160,7 +160,10 @@ export const QuizUi = () => {
 
     const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        genRecommendedCourses({unAnsweredSelector, answeredSelector, Questions})
+        let generatedCourses = genRecommendedCourses({unAnsweredSelector, answeredSelector, Questions})
+        if(generatedCourses){
+
+        }
     }
 
 

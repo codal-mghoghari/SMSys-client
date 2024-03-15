@@ -1,11 +1,13 @@
 [
   {
-    "categories": [
-      "Javascript",
-      "Typescript",
-      "cSharp",
-      "Java"
-    ],
+    "categories": {
+      "Javascript": 0,
+      "Typescript": 0,
+      "cSharp": 0,
+      "Java": 0,
+      "Python": 0,
+      "Rust": 0
+    },
     "questions": [
       {
         "questions": [
@@ -24,7 +26,7 @@
               },
               {
                 "id": 3,
-                "answer": "ANSWER",
+                "answer": "ANSWERsd",
                 "isCorrect": true
               },
               {

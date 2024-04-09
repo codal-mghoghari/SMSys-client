@@ -202,6 +202,78 @@
                 "answer": "WRONG"
               }
             ]
+          },
+          {
+            "id": 9,
+            "type": "cSharp",
+            "question": "Which symbol is used in cSharp for commenting?",
+            "answerOptions": [
+              {
+                "id": 1,
+                "answer": "WRONG"
+              },
+              {
+                "id": 2,
+                "answer": "WRONG"
+              },
+              {
+                "id": 3,
+                "answer": "ANSWER",
+                "isCorrect": true
+              },
+              {
+                "id": 4,
+                "answer": "WRONG"
+              }
+            ]
+          },
+          {
+            "id": 10,
+            "type": "cSharp",
+            "question": "Which symbol is used in Typescript for commenting?",
+            "answerOptions": [
+              {
+                "id": 1,
+                "answer": "WRONG"
+              },
+              {
+                "id": 2,
+                "answer": "WRONG"
+              },
+              {
+                "id": 3,
+                "answer": "ANSWER",
+                "isCorrect": true
+              },
+              {
+                "id": 4,
+                "answer": "WRONG"
+              }
+            ]
+          },
+          {
+            "id": 11,
+            "type": "Java",
+            "question": "Which symbol is used in Java for commenting?",
+            "answerOptions": [
+              {
+                "id": 1,
+                "answer": "WRONG"
+              },
+              {
+                "id": 2,
+                "answer": "WRONG"
+              },
+              {
+                "id": 3,
+                "answer": "ANSWER",
+                "isCorrect": true
+              },
+              {
+                "id": 4,
+                "answer": "WRONG"
+              }
+            ]
           }
         ]
       }

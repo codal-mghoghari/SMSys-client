@@ -10,7 +10,7 @@ export default function Home() {
     return (
         <>
             {
-                isLoggedIn ? (push('/dashboard')) : (push('/login'))
+                push('/dashboard')
             }
         </>
     );

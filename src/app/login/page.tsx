@@ -8,7 +8,7 @@ import Image from "next/image";
 import {useRouter} from 'next/navigation';
 import {notifySuccess, notifyError, createCookie, getCooki} from "@/util/Common";
 import {useDispatch} from "react-redux";
-import {_setUser} from "../../../redux/store/slices/userReducer";
+import {_setUser, _setUserEntryTest} from "../../../redux/store/slices/userReducer";
 import './page.css'
 
 export default function Page() {
@@ -55,17 +55,18 @@ export default function Page() {
         }
     }
 
-    const validateLogin = (values: FormikValues) => {
+    const validateLogin = async (values: FormikValues) => {
         const {email, password} = values
-        loginUser(email, password).then((res) => {
-            if (res.data) {
+        await loginUser(email, password).then((res) => {
+            if (res?.data) {
                 notifySuccess(res.message)
-                console.log(res.data.user)
-                dispatch(_setUser(res.data.user))
+                console.log("res?.data.user", res?.data?.user)
+                dispatch(_setUser(res?.data?.user))
+                dispatch(_setUserEntryTest(res?.data?.user?.entryTest))
                 // if(!isLoggedIn){ // If localStorage already has token, it will not re-set it.
                 //     localStorage.setItem('token', res.data.token)
                 // }
-                createCookie("token", res.data.token, 1440)
+                createCookie("token", res?.data?.token, 1440)
                 push('/dashboard')
             } else {
                 notifyError(res.message)
@@ -88,178 +89,173 @@ export default function Page() {
 
     return (
         <>
-            {
-                isLoggedIn ? (push('/dashboard')) : (
-                    <>
-                        <div className="relative top-24 left-[15%] w-[100%] bg-red-600 rounded-2xl shadow-xl drop-shadow-lg">
-                            <Image src="/logo.png" width="65" height="65"
-                                   className="absolute z-[100] animate-bounce right-[32%] bottom-[-6vh]" alt="logo"/>
-                            <div id="loginContainer" className="absolute flex flex-row w-4/6 h-[65vh] z-20">
-                                <div id="login"
-                                    className="flex flex-col bg-white w-2/4 text-center p-10 justify-center items-center">
-                                    <Formik validationSchema={LoginSchema}
-                                            initialValues={{email: "", password: ""}}
-                                            enableReinitialize={true}
-                                            onSubmit={(e) => validateLogin(e)}
-                                    >
-                                        {({
-                                              values,
-                                              errors,
-                                              touched,
-                                              handleChange,
-                                              handleSubmit,
-                                              handleBlur
-                                          }) => (
-                                            <form method="post" onSubmit={handleSubmit}
-                                                  className="flex flex-col text-center gap-5 justify-center items-center">
-                                                <span className="text-black text-xl font-bold">Sign In</span>
-                                                <input id="email" name="email"
-                                                       className="bg-[#eee] border-none py-2 px-3 w-full rounded text-sm"
-                                                       type="email"
-                                                       onChange={handleChange}
-                                                       onBlur={handleBlur}
-                                                       value={values.email}
-                                                       placeholder="Email"/>
-                                                {
-                                                    touched.email && errors.email && (
-                                                        <span
-                                                            className="text-red-600 text-xs -mt-3 hover:underline">{errors.email}</span>
-                                                    )
-                                                }
 
-                                                <input id="password" name="password"
-                                                       className="bg-[#eee] border-none py-2 px-3 w-full rounded text-sm"
-                                                       type="password"
-                                                       onChange={handleChange}
-                                                       onBlur={handleBlur}
-                                                       value={values.password}
-                                                       placeholder="Password"/>
-                                                {
-                                                    touched.password && errors.password && (
-                                                        <span
-                                                            className="text-red-600 text-xs -mt-3">{errors.password}</span>
+            <div className="relative top-24 left-[15%] w-[100%] bg-red-600 rounded-2xl shadow-xl drop-shadow-lg">
+                <Image src="/logo.png" width="65" height="65"
+                       className="absolute z-[100] animate-bounce right-[32%] bottom-[-6vh]" alt="logo"/>
+                <div id="loginContainer" className="absolute flex flex-row w-4/6 h-[65vh] z-20">
+                    <div id="login"
+                         className="flex flex-col bg-white w-2/4 text-center p-10 justify-center items-center">
+                        <Formik validationSchema={LoginSchema}
+                                initialValues={{email: "", password: ""}}
+                                enableReinitialize={true}
+                                onSubmit={(e) => validateLogin(e)}
+                        >
+                            {({
+                                  values,
+                                  errors,
+                                  touched,
+                                  handleChange,
+                                  handleSubmit,
+                                  handleBlur
+                              }) => (
+                                <form method="post" onSubmit={handleSubmit}
+                                      className="flex flex-col text-center gap-5 justify-center items-center">
+                                    <span className="text-black text-xl font-bold">Sign In</span>
+                                    <input id="email" name="email"
+                                           className="bg-[#eee] border-none py-2 px-3 w-full rounded text-sm"
+                                           type="email"
+                                           onChange={handleChange}
+                                           onBlur={handleBlur}
+                                           value={values.email}
+                                           placeholder="Email"/>
+                                    {
+                                        touched.email && errors.email && (
+                                            <span
+                                                className="text-red-600 text-xs -mt-3 hover:underline">{errors.email}</span>
+                                        )
+                                    }
 
-                                                    )
-                                                }
-                                                <a className="text-sm group transition duration-300" href="#">Forgot
-                                                    your
-                                                    password?
-                                                    <span
-                                                        className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-gray-300"></span>
-                                                </a>
+                                    <input id="password" name="password"
+                                           className="bg-[#eee] border-none py-2 px-3 w-full rounded text-sm"
+                                           type="password"
+                                           onChange={handleChange}
+                                           onBlur={handleBlur}
+                                           value={values.password}
+                                           placeholder="Password"/>
+                                    {
+                                        touched.password && errors.password && (
+                                            <span
+                                                className="text-red-600 text-xs -mt-3">{errors.password}</span>
 
-                                                <button
-                                                    type="submit"
-                                                    className="rounded-full w-2/4 text-xs bg-custom-primary border text-white font-bold py-3 px-2 tracking-wider uppercase transition-transform duration-[80ms] ease-in active:scale-[0.95]">Login
-                                                </button>
-                                            </form>
-                                        )}
-                                    </Formik>
-                                </div>
-                            </div>
-                            <div id="registerContainer" className="absolute flex flex-row w-4/6 h-[65vh] z-10">
-                                <div id="register"
-                                    className="flex flex-col bg-white w-2/4 text-center p-10 justify-center items-center">
-                                    <Formik validationSchema={RegisterSchema}
-                                            initialValues={{reg_full_name: "", reg_email: "", reg_password: ""}}
-                                            enableReinitialize={true}
-                                            onSubmit={(e) => validateRegister(e)}
-                                    >
-                                        {({
-                                              values,
-                                              errors,
-                                              touched,
-                                              handleChange,
-                                              handleSubmit,
-                                              handleBlur
-                                          }) => (
-                                            <form method="post" onSubmit={handleSubmit}
-                                                  className="flex flex-col text-center gap-4 justify-center items-center">
-                                                <span className="text-black text-xl font-bold">Sign Up</span>
-                                                <input id="reg_full_name" name="reg_full_name"
-                                                       className="bg-[#eee] border-none py-2 px-3 w-full rounded text-sm"
-                                                       type="text"
-                                                       onChange={handleChange}
-                                                       onBlur={handleBlur}
-                                                       value={values.reg_full_name}
-                                                       placeholder="Full Name"/>
-                                                {
-                                                    touched.reg_full_name && errors.reg_full_name && (
-                                                        <span
-                                                            className="text-red-600 text-xs">{errors.reg_full_name}</span>
-
-                                                    )
-                                                }
-                                                <input id="reg_email" name="reg_email"
-                                                       className="bg-[#eee] border-none py-2 px-3 w-full rounded text-sm"
-                                                       type="email"
-                                                       onChange={handleChange}
-                                                       onBlur={handleBlur}
-                                                       value={values.reg_email}
-                                                       placeholder="Email"/>
-                                                {
-                                                    touched.reg_email && errors.reg_email && (
-                                                        <span
-                                                            className="text-red-600 text-xs -mt-3">{errors.reg_email}</span>
-
-                                                    )
-                                                }
-                                                <input id="reg_password" name="reg_password"
-                                                       className="bg-[#eee] border-none py-2 px-3 w-full rounded text-sm"
-                                                       type="password"
-                                                       onChange={handleChange}
-                                                       onBlur={handleBlur}
-                                                       value={values.reg_password}
-                                                       placeholder="Password"/>
-                                                {
-                                                    touched.reg_password && errors.reg_password && (
-                                                        <span
-                                                            className="text-red-600 text-xs -mt-3">{errors.reg_password}</span>
-
-                                                    )
-                                                }
-                                                <button
-                                                    type="submit"
-                                                    className="rounded-full w-2/3 text-xs bg-custom-primary text-white font-bold py-3 px-2 tracking-wider uppercase transition-transform duration-[80ms] ease-in active:scale-[0.95]">Register
-                                                </button>
-                                            </form>
-                                        )}
-                                    </Formik>
-                                </div>
-                            </div>
-                            <div id="overlayContainer" className="absolute flex flex-row h-[65vh] w-4/6 right-0">
-                                <div id="rightPanel"
-                                    className="flex flex-col bg-custom-primary w-2/4 text-center z-20 p-10 justify-center items-center">
-                                    <div className="flex flex-col text-center gap-5 justify-center items-center">
-                                        <span className="text-white text-xl font-bold">Hello, Friend!</span>
+                                        )
+                                    }
+                                    <a className="text-sm group transition duration-300" href="#">Forgot
+                                        your
+                                        password?
                                         <span
-                                            className="text-white text-sm">Enter your personal details and start the journey with us</span>
-                                        <button
-                                            onClick={handleSignUp}
-                                            type="button"
-                                            className="cursor-pointer rounded-full w-2/3 text-xs text-white border border-solid border-white font-bold py-3 px-2 tracking-wider uppercase transition-transform duration-[80ms] ease-in active:scale-[0.95]">Register
-                                            now!
-                                        </button>
-                                    </div>
-                                </div>
-                                <div id="leftPanel"
-                                     className="flex flex-col bg-custom-primary w-2/4 text-center z-10 p-10 justify-center items-center invisible">
-                                    <div className="flex flex-col text-center gap-5 justify-center items-center">
-                                        <span className="text-white text-xl font-bold">Welcome Back!</span>
-                                        <span
-                                            className="text-white text-sm">If you already have account registered, you can login here:</span>
-                                        <button
-                                            onClick={handleSignUp}
-                                            type="button"
-                                            className="rounded-full w-2/5 text-xs text-white border border-solid border-white font-bold py-3 px-2 tracking-wider uppercase transition-transform duration-[80ms] ease-in active:scale-[0.95]">Login
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                                            className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-gray-300"></span>
+                                    </a>
+
+                                    <button
+                                        type="submit"
+                                        className="rounded-full w-2/4 text-xs bg-custom-primary border text-white font-bold py-3 px-2 tracking-wider uppercase transition-transform duration-[80ms] ease-in active:scale-[0.95]">Login
+                                    </button>
+                                </form>
+                            )}
+                        </Formik>
+                    </div>
+                </div>
+                <div id="registerContainer" className="absolute flex flex-row w-4/6 h-[65vh] z-10">
+                    <div id="register"
+                         className="flex flex-col bg-white w-2/4 text-center p-10 justify-center items-center">
+                        <Formik validationSchema={RegisterSchema}
+                                initialValues={{reg_full_name: "", reg_email: "", reg_password: ""}}
+                                enableReinitialize={true}
+                                onSubmit={(e) => validateRegister(e)}
+                        >
+                            {({
+                                  values,
+                                  errors,
+                                  touched,
+                                  handleChange,
+                                  handleSubmit,
+                                  handleBlur
+                              }) => (
+                                <form method="post" onSubmit={handleSubmit}
+                                      className="flex flex-col text-center gap-4 justify-center items-center">
+                                    <span className="text-black text-xl font-bold">Sign Up</span>
+                                    <input id="reg_full_name" name="reg_full_name"
+                                           className="bg-[#eee] border-none py-2 px-3 w-full rounded text-sm"
+                                           type="text"
+                                           onChange={handleChange}
+                                           onBlur={handleBlur}
+                                           value={values.reg_full_name}
+                                           placeholder="Full Name"/>
+                                    {
+                                        touched.reg_full_name && errors.reg_full_name && (
+                                            <span
+                                                className="text-red-600 text-xs">{errors.reg_full_name}</span>
+
+                                        )
+                                    }
+                                    <input id="reg_email" name="reg_email"
+                                           className="bg-[#eee] border-none py-2 px-3 w-full rounded text-sm"
+                                           type="email"
+                                           onChange={handleChange}
+                                           onBlur={handleBlur}
+                                           value={values.reg_email}
+                                           placeholder="Email"/>
+                                    {
+                                        touched.reg_email && errors.reg_email && (
+                                            <span
+                                                className="text-red-600 text-xs -mt-3">{errors.reg_email}</span>
+
+                                        )
+                                    }
+                                    <input id="reg_password" name="reg_password"
+                                           className="bg-[#eee] border-none py-2 px-3 w-full rounded text-sm"
+                                           type="password"
+                                           onChange={handleChange}
+                                           onBlur={handleBlur}
+                                           value={values.reg_password}
+                                           placeholder="Password"/>
+                                    {
+                                        touched.reg_password && errors.reg_password && (
+                                            <span
+                                                className="text-red-600 text-xs -mt-3">{errors.reg_password}</span>
+
+                                        )
+                                    }
+                                    <button
+                                        type="submit"
+                                        className="rounded-full w-2/3 text-xs bg-custom-primary text-white font-bold py-3 px-2 tracking-wider uppercase transition-transform duration-[80ms] ease-in active:scale-[0.95]">Register
+                                    </button>
+                                </form>
+                            )}
+                        </Formik>
+                    </div>
+                </div>
+                <div id="overlayContainer" className="absolute flex flex-row h-[65vh] w-4/6 right-0">
+                    <div id="rightPanel"
+                         className="flex flex-col bg-custom-primary w-2/4 text-center z-20 p-10 justify-center items-center">
+                        <div className="flex flex-col text-center gap-5 justify-center items-center">
+                            <span className="text-white text-xl font-bold">Hello, Friend!</span>
+                            <span
+                                className="text-white text-sm">Enter your personal details and start the journey with us</span>
+                            <button
+                                onClick={handleSignUp}
+                                type="button"
+                                className="cursor-pointer rounded-full w-2/3 text-xs text-white border border-solid border-white font-bold py-3 px-2 tracking-wider uppercase transition-transform duration-[80ms] ease-in active:scale-[0.95]">Register
+                                now!
+                            </button>
                         </div>
-                    </>
-                )
-            }
+                    </div>
+                    <div id="leftPanel"
+                         className="flex flex-col bg-custom-primary w-2/4 text-center z-10 p-10 justify-center items-center invisible">
+                        <div className="flex flex-col text-center gap-5 justify-center items-center">
+                            <span className="text-white text-xl font-bold">Welcome Back!</span>
+                            <span
+                                className="text-white text-sm">If you already have account registered, you can login here:</span>
+                            <button
+                                onClick={handleSignUp}
+                                type="button"
+                                className="rounded-full w-2/5 text-xs text-white border border-solid border-white font-bold py-3 px-2 tracking-wider uppercase transition-transform duration-[80ms] ease-in active:scale-[0.95]">Login
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </>
     )
 }

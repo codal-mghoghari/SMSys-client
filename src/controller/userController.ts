@@ -2,7 +2,13 @@ import axios, {AxiosError, AxiosResponse} from "axios";
 import {getCooki} from "@/util/Common";
 
 const Client = axios.create({
-    headers: {"Content-Type": "application/json", "Authorization": "Bearer " + getCooki('token')},
+    headers: {
+        "Accept": "application/json",
+        "Origin": "http://localhost:3000",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + getCooki('token')
+    },
+    withCredentials: true,
 })
 
 export const registerUser = async (first_name: string, last_name: string, email: string, password: string) => {
@@ -18,7 +24,7 @@ export const registerUser = async (first_name: string, last_name: string, email:
             }
         )
         .catch((error) => {
-            if (error.response.status === 400) {
+            if (error.response.status) {
                 return error.response.data
             } else {
                 return error
@@ -33,13 +39,11 @@ export const loginUser = async (email: string, password: string) => {
     })
         .then(
             (response: AxiosResponse) => {
-                return response.data
+                return response?.data
             }
         )
         .catch((error) => {
-            if (error.response.status === 400) {
-                return error.response.data
-            } else if(error.response.status === 404) {
+            if (error.response.status) {
                 return error.response.data
             } else {
                 return error
@@ -48,7 +52,12 @@ export const loginUser = async (email: string, password: string) => {
 }
 
 
-export const updateUserCourse = async (data: { js: boolean, ts: boolean, cSharp: boolean, java: boolean }, id: number) => {
+export const updateUserCourse = async (data: {
+    js: boolean,
+    ts: boolean,
+    cSharp: boolean,
+    java: boolean
+}, id: number) => {
     return await Client.put(`http://localhost:8000/api/user/${id}`, {
         optedCourses: JSON.stringify(data)
     })
@@ -58,12 +67,25 @@ export const updateUserCourse = async (data: { js: boolean, ts: boolean, cSharp:
             }
         )
         .catch((error) => {
-            if (error.response.status === 400) {
-                return error.response.data
-            } else if(error.response.status === 404) {
+            if (error.response.status) {
+                return error.response.statusText
+            } else {
+                return error
+            }
+        })
+}
+
+export const updateUserEntryTest = async (data: boolean, id: number) => {
+    return await Client.put(`http://localhost:8000/api/user/${id}`, {entryTest: data})
+        .then(
+            (response: AxiosResponse) => {
+                return response.data
+            }
+        )
+        .catch((error) => {
+            if (error.response.status) {
                 return error.response.data
             } else {
-                console.log(error)
                 return error
             }
         })

@@ -8,12 +8,17 @@ import {
     _resetQuizQuestions,
     _updateQuizData,
     _setUnAnsweredQuestions,
-    _removeUnAnsweredQuestions, _resetUnAnsweredQuestions
+    _removeUnAnsweredQuestions, _resetUnAnsweredQuestions, _setRecommCourses
 } from "../../redux/store/slices/quizReducer";
 import {rootStateType} from "../../redux/store/mainStore";
 import {toast} from "react-toastify";
-import {notifySuccess} from "@/util/Common";
+import {getCooki, notifyError, notifySuccess} from "@/util/Common";
 import SubmitDialog from "@/components/SubmitDialog";
+import {updateUserCourse, updateUserEntryTest} from "@/controller/userController";
+import {_setUserCourses, _setUserEntryTest} from "../../redux/store/slices/userReducer";
+import {jwtUserData} from "@/interfaces/iRegisterUser";
+import {jwtDecode} from "jwt-decode";
+import {useRouter} from "next/navigation";
 import genRecommendedCourses from "@/util/genRecommendedCourses";
 
 type RootQuestions = {
@@ -54,6 +59,8 @@ export const QuizUi = () => {
 
 
     //Variables
+    const {push} = useRouter();
+    const {userData}: jwtUserData = getCooki('token') ? jwtDecode(getCooki('token')!) : {};
     const dispatch = useDispatch();
     const quizCategories = quizData.map((quiz) => {
         return quiz.questions[0]
@@ -158,12 +165,21 @@ export const QuizUi = () => {
         setDialogBool({bool: false, elem: "confirm"})
     }
 
-    const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        let generatedCourses = genRecommendedCourses({unAnsweredSelector, answeredSelector, Questions})
-        if(generatedCourses){
-
-        }
+        await updateUserEntryTest(true, userData?.id!).then(res => {
+            if (res.data) {
+                // notifySuccess(res.message)
+                let returnedCourses = genRecommendedCourses({answeredSelector, unAnsweredSelector, Questions})
+                if (returnedCourses) {
+                    dispatch(_setRecommCourses(returnedCourses))
+                }
+                dispatch(_setUserEntryTest(true))
+                push('/dashboard')
+            } else {
+                notifyError(res.message)
+            }
+        })
     }
 
 
@@ -208,15 +224,11 @@ export const QuizUi = () => {
                                         </h3>
                                     </div>
                                     {
-                                        question.type === "Javascript" ? (
-                                            <Image className="absolute left-5 top-5" width="50"
-                                                   height="50"
-                                                   src="/jsicon.png" alt="js"/>
-                                        ) : (
-                                            <Image className="absolute left-5 top-5" width="50"
-                                                   height="50"
-                                                   src="/tsicon.png" alt="js"/>
-                                        )
+
+                                        <Image className="absolute left-5 top-5" width="50"
+                                               height="50"
+                                               src={`/${question.type}.png`} alt="js"/>
+
                                     }
                                     <label className="text-lg text-gray-800 mb-2">
                                         {question.question}
@@ -228,24 +240,21 @@ export const QuizUi = () => {
                                             isCorrect?: undefined | boolean
                                         }, index: React.Key) => {
                                         return (
-                                            <>
-                                                <div key={index}
-                                                     className="flex items-center space-x-4">
-                                                    <input id={question.id.toString()}
-                                                           name="option" type="radio"
-                                                           value={option.answer}
-                                                           checked={
-                                                               answeredSelector[question.id] === option.answer
-                                                           }
-                                                           onChange={e => handleSelect(e)}
-                                                           className="w-4 h-4 text-blue-600 bg-custom-primary border-gray-800 focus:outline-0"
-                                                           required
-                                                    />
-                                                    <label className="text-black">
-                                                        {option.answer}
-                                                    </label>
-                                                </div>
-                                            </>
+                                            <div key={index}
+                                                 className="flex items-center space-x-4">
+                                                <input id={question.id.toString()}
+                                                       name="option" type="radio"
+                                                       value={option.answer}
+                                                       checked={
+                                                           answeredSelector[question.id] === option.answer
+                                                       }
+                                                       onChange={e => handleSelect(e)}
+                                                       className="w-4 h-4 text-blue-600 bg-custom-primary border-gray-800 focus:outline-0"
+                                                />
+                                                <label className="text-black">
+                                                    {option.answer}
+                                                </label>
+                                            </div>
                                         )
                                     })
                                     }

@@ -13,19 +13,22 @@ export function createCookie(username: string, value: string, minutes: number) {
 }
 
 export function getCooki(name: string) {
-    if(typeof window !== "undefined") {
+    if (typeof window !== "undefined") {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop()?.split(';').shift();
+        if (parts.length === 2) {
+            return parts.pop()?.split(';').shift();
+        }
+        return null
     }
 }
 
 export function capitalizeEachWord(str: string) {
-    let splitStr = str.toLowerCase().split(' ');
-    for (let i = 0; i < splitStr.length; i++) {
-        splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
+    let splitStr = str?.toLowerCase().split(' ');
+    for (let i = 0; i < splitStr?.length; i++) {
+        splitStr[i] = splitStr[i]?.charAt(0).toUpperCase() + splitStr[i].substring(1);
     }
-    return splitStr.join(' ');
+    return splitStr?.join(' ');
 }
 
 

@@ -1,14 +1,11 @@
 import {combineReducers, configureStore} from '@reduxjs/toolkit'
 import userReducer from "./slices/userReducer";
 import {persistStore, persistReducer} from 'redux-persist'
-// import storage from 'redux-persist/lib/storage'
 import quizReducer from "./slices/quizReducer";
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-
 
 import createWebStorage from "redux-persist/es/storage/createWebStorage";
 
-function createPersistStore() {
+function createPersistStore() { //To fix the warning/error for falling back to noop-storage or usage of static storage.
     const isServer = typeof window === "undefined";
     if (isServer) {
         return {
@@ -64,8 +61,6 @@ const store = configureStore({
         }
     )
 })
+
 const persistor = persistStore(store)
-
-
-
 export {store, persistor}

@@ -20,15 +20,15 @@ export default function Page() {
     //Global preload
     const isLoggedIn = !!getCooki('token');
     const userDataSelector: RegisteredUserData = useSelector((state: rootStateType) => state.user.loggedInUserData);
-
+    const entryTest: boolean = useSelector((state: rootStateType) => state.user.entryTest);
 
     //Local States
     const [activeElem, setActiveElem] = useState("user");
     const [optedCourses, setOptedCourses] = useState(userDataSelector.optedCourses === undefined ? ({}) : (JSON.parse(userDataSelector.optedCourses!)));
 
     //Variables
-    const {userData}: jwtUserData = jwtDecode(getCooki('token')!);
     const {push} = useRouter();
+    const {userData}: jwtUserData = isLoggedIn ? jwtDecode(getCooki('token')!) : {}
     const prevOptedCourses = useRef(optedCourses);
     const saveOptedCourses = (document.getElementById('saveOptedCourses')!)
     const dispatch = useDispatch();
@@ -37,56 +37,51 @@ export default function Page() {
         const checked = (e.target as HTMLInputElement).checked;
         setOptedCourses({
             ...optedCourses,
-            [e.target.id]: checked,
+            [e.target.name]: checked,
         })
     }
 
+
     const handleSaveOptedCourses = () => {
-        setTimeout(async () => {
-            await updateUserCourse(optedCourses, userData.id!).then(res => {
-                if (res.data) {
-                    notifySuccess(res.message)
-                    dispatch(_setUserCourses(JSON.stringify(optedCourses)))
-                } else {
-                    notifyError(res.message)
-                }
-            })
-            saveOptedCourses.classList.add('invisible')
-            prevOptedCourses.current = optedCourses
-        }, 2000)
+        console.log("optedCourses", optedCourses)
+        // TODO()
+        // setTimeout(async () => {
+        //     await updateUserCourse(optedCourses, userData?.id!).then(res => {
+        //         if (res.data) {
+        //             notifySuccess(res.message)
+        //             dispatch(_setUserCourses(JSON.stringify(optedCourses)))
+        //         } else {
+        //             notifyError(res.message)
+        //         }
+        //     })
+        //     saveOptedCourses.classList.add('invisible')
+        //     prevOptedCourses.current = optedCourses
+        // }, 2000)
     }
 
     useEffect(() => {
-        if (!isLoggedIn) { //Check if user has token in their cookie, if not it shall be logged out.
-            push('/login')
+        if (!entryTest) { // If user is logged-in but has not given the entry test yet, shall be redirected to EntryTest page.
+            push('/entrytest')
         }
 
-        let inputElements: StringIndexable = (document.getElementById('opt-course-container') as HTMLElement).getElementsByTagName('input')
-        for (let i = 0; i < inputElements.length; i++) {
+        let inputElements: StringIndexable = (document.getElementById('opt-course-container') as HTMLElement)?.getElementsByTagName('input')
+        for (let i = 0; i < inputElements?.length; i++) {
             inputElements[i].checked = Object.values(optedCourses)[i]
         }
         if (JSON.stringify(prevOptedCourses.current) !== JSON.stringify(optedCourses)) {
             saveOptedCourses.classList.remove('invisible')
         } else {
-            const saveOptedCourses = (document.getElementById('saveOptedCourses')!)
-            saveOptedCourses.classList.add('invisible')
+            const saveOptedCourses = (document.getElementById('saveOptedCourses') as HTMLElement)
+            saveOptedCourses?.classList.add('invisible')
         }
     }, [optedCourses]);
 
     const handleUserClick = () => {
         setActiveElem("user")
-        const userDashboardElem = document.getElementById('user') as HTMLElement
-        const settingsElem = document.getElementById('settings') as HTMLElement
-        userDashboardElem.classList.remove("invisible")
-        settingsElem.classList.add("invisible")
     }
 
     const handleSettingsClick = () => {
         setActiveElem("settings")
-        const userDashboardElem = document.getElementById('user') as HTMLElement
-        const settingsElem = document.getElementById('settings') as HTMLElement
-        settingsElem.classList.remove("invisible")
-        userDashboardElem.classList.add("invisible")
     }
 
     return (
@@ -101,12 +96,12 @@ export default function Page() {
                                 <span
                                     className="absolute left-0 top-3 z-10 text-white text-xl font-bold animate-pulse">{defaultConfig.websiteTitle}</span>
                                 <header
-                                    className="h-16 w-full flex items-center relative justify-end px-5 space-x-10 bg-custom-primary">
+                                    className="min-h-16 w-full flex items-center relative justify-end px-5 space-x-10 bg-custom-primary">
                                     <div className="flex flex-shrink-0 items-center space-x-4 text-white">
 
                                         <div className="flex flex-col items-end ">
                                             <div
-                                                className="text-md font-medium">{capitalizeEachWord(userDataSelector.full_name!)}</div>
+                                                className="text-md font-medium">{capitalizeEachWord(userDataSelector.full_name)}</div>
                                             <div
                                                 className="text-sm font-regular">{userDataSelector.role === 0 ? ('Admin') : ('Student')}</div>
                                         </div>
@@ -122,6 +117,7 @@ export default function Page() {
                                 <DashboardContent
                                     userData={userDataSelector}
                                     active={activeElem}
+                                    setActive={setActiveElem}
                                     clickHandler={(e) => tickHandler(e)}
                                 />
                                 <div id="saveOptedCourses"

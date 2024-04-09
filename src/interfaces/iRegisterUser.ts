@@ -1,7 +1,7 @@
 export type jwtUserData = {
-    userData: RegisteredUserData,
-    iat: number,
-    exp: number
+    userData?: RegisteredUserData,
+    iat?: number,
+    exp?: number
 }
 
 export type RegisteredUserData = {
@@ -9,7 +9,7 @@ export type RegisteredUserData = {
     date_of_birth?: null | string,
     email?: string,
     first_name?: string,
-    full_name?: string,
+    full_name: string,
     id?: number,
     is_deleted?: number,
     last_name?: string,

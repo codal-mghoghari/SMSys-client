@@ -2,11 +2,15 @@ import {createSlice} from "@reduxjs/toolkit";
 import {RegisteredUserData} from "@/interfaces/iRegisterUser";
 
 type loggedUserData = {
-    loggedInUserData: RegisteredUserData
+    loggedInUserData: RegisteredUserData,
+    entryTest: false
 }
 
 const initialState: loggedUserData = {
-    loggedInUserData: {}
+    loggedInUserData: {
+        full_name: ""
+    },
+    entryTest: false
 }
 
 export const userSlice = createSlice({
@@ -18,7 +22,11 @@ export const userSlice = createSlice({
         },
         _setUserCourses: (state, action) => {
             state.loggedInUserData.optedCourses = action.payload
-        }
+        },
+        _setUserEntryTest: (state, action) => {
+            state.entryTest = action.payload
+        },
+
     }
 })
 
@@ -27,5 +35,6 @@ export default userSlice.reducer
 
 export const {
     _setUser,
-    _setUserCourses
+    _setUserCourses,
+    _setUserEntryTest,
 } = userSlice.actions

@@ -4,7 +4,7 @@ import {getCooki} from "@/util/Common";
 const Client = axios.create({
     headers: {
         "Accept": "application/json",
-        "Origin": "http://localhost:3000",
+        "Access-Control-Allow-Origin": "http://localhost:8000/",
         "Content-Type": "application/json",
         "Authorization": "Bearer " + getCooki('token')
     },
@@ -52,14 +52,9 @@ export const loginUser = async (email: string, password: string) => {
 }
 
 
-export const updateUserCourse = async (data: {
-    js: boolean,
-    ts: boolean,
-    cSharp: boolean,
-    java: boolean
-}, id: number) => {
-    return await Client.put(`http://localhost:8000/api/user/${id}`, {
-        optedCourses: JSON.stringify(data)
+export const updateUserCourse = async (data: {courseId: string}, id: number) => {
+    return await Client.post(`http://localhost:8000/api/optcourse/${id}`, {
+        courseId: JSON.stringify(data)
     })
         .then(
             (response: AxiosResponse) => {

@@ -26,11 +26,14 @@ export default function Page() {
     const [activeElem, setActiveElem] = useState("user");
     const [optedCourses, setOptedCourses] = useState(userDataSelector.optedCourses === undefined ? ({}) : (JSON.parse(userDataSelector.optedCourses!)));
 
+    const [opted, setOpted] = useState<string[]>([])
+    const [unOpted, setUnOpted] = useState<string[]>([])
+
     //Variables
     const {push} = useRouter();
     const {userData}: jwtUserData = isLoggedIn ? jwtDecode(getCooki('token')!) : {}
     const prevOptedCourses = useRef(optedCourses);
-    const saveOptedCourses = (document.getElementById('saveOptedCourses')!)
+    const saveOptedCourses = typeof window !== undefined ? (document.getElementById('saveOptedCourses') as HTMLElement) : null
     const dispatch = useDispatch();
 
     const tickHandler = (e: ChangeEvent<HTMLInputElement>) => {
@@ -41,39 +44,76 @@ export default function Page() {
         })
     }
 
+    useEffect(() => {
+        console.log("D: ", opted, unOpted)
+        if(opted){
+            setTimeout(async () => {
+                for (const opt of opted) {
+                    console.log("opt: ", opt)
+                    await updateUserCourse({courseId: opt}, userData?.id!).then(res => {
+                        if (res.data) {
+                            console.log("OPTED RES:", res)
+                            notifySuccess(res.message)
+                            // dispatch(_setUserCourses(JSON.stringify(optedCourses)))
+                        } else {
+                            console.error(res)
+                            notifyError(res.message)
+                        }
+                    })
+                }
+                saveOptedCourses?.classList.add('invisible')
+                prevOptedCourses.current = optedCourses
+            }, 2000)
+        }
+        if(unOpted){
+            setTimeout(async () => {
+                for (const opt of unOpted) {
+                    await updateUserCourse({courseId: opt}, userData?.id!).then(res => {
+                        if (res.data) {
+                            notifySuccess(res.message)
+                            console.log("UNOPTED RES:", res)
+                            // dispatch(_setUserCourses(JSON.stringify(optedCourses)))
+                        } else {
+                            console.error(res)
+                            notifyError(res.message)
+                        }
+                    })
+                }
+                saveOptedCourses?.classList.add('invisible')
+                prevOptedCourses.current = optedCourses
+            }, 2000)
+        }
+    }, [opted, unOpted]);
+
 
     const handleSaveOptedCourses = () => {
         console.log("optedCourses", optedCourses)
-        // TODO()
-        // setTimeout(async () => {
-        //     await updateUserCourse(optedCourses, userData?.id!).then(res => {
-        //         if (res.data) {
-        //             notifySuccess(res.message)
-        //             dispatch(_setUserCourses(JSON.stringify(optedCourses)))
-        //         } else {
-        //             notifyError(res.message)
-        //         }
-        //     })
-        //     saveOptedCourses.classList.add('invisible')
-        //     prevOptedCourses.current = optedCourses
-        // }, 2000)
+        setOpted(Object.keys(optedCourses).filter((key: string) => {
+            return optedCourses[key] === true && key
+        }))
+        setUnOpted(Object.keys(optedCourses).filter((key: string) => {
+            return optedCourses[key] === false && key
+        }))
     }
 
     useEffect(() => {
-        if (!entryTest) { // If user is logged-in but has not given the entry test yet, shall be redirected to EntryTest page.
-            push('/entrytest')
-        }
+        // if (!entryTest) { // If user is logged-in but has not given the entry test yet, shall be redirected to EntryTest page.
+        //     push('/entrytest')
+        // }
 
         let inputElements: StringIndexable = (document.getElementById('opt-course-container') as HTMLElement)?.getElementsByTagName('input')
         for (let i = 0; i < inputElements?.length; i++) {
             inputElements[i].checked = Object.values(optedCourses)[i]
         }
-        if (JSON.stringify(prevOptedCourses.current) !== JSON.stringify(optedCourses)) {
-            saveOptedCourses.classList.remove('invisible')
-        } else {
+        if (typeof window !== undefined) {
             const saveOptedCourses = (document.getElementById('saveOptedCourses') as HTMLElement)
-            saveOptedCourses?.classList.add('invisible')
+            if (JSON.stringify(prevOptedCourses.current) !== JSON.stringify(optedCourses)) {
+                saveOptedCourses?.classList.remove('invisible')
+            } else {
+                saveOptedCourses?.classList.add('invisible')
+            }
         }
+
     }, [optedCourses]);
 
     const handleUserClick = () => {

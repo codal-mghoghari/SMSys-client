@@ -26,7 +26,6 @@ export const userSlice = createSlice({
         _setUserEntryTest: (state, action) => {
             state.entryTest = action.payload
         },
-
     }
 })
 

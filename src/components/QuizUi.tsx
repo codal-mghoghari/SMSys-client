@@ -12,9 +12,9 @@ import {
 } from "../../redux/store/slices/quizReducer";
 import {rootStateType} from "../../redux/store/mainStore";
 import {toast} from "react-toastify";
-import {getCooki, notifyError, notifySuccess} from "@/util/Common";
+import {getCookie, notifyError, notifySuccess} from "@/util/Common";
 import SubmitDialog from "@/components/SubmitDialog";
-import {updateUserCourse, updateUserEntryTest} from "@/controller/userController";
+import {updateUserEntryTest} from "@/controller/userController";
 import {_setUserCourses, _setUserEntryTest} from "../../redux/store/slices/userReducer";
 import {jwtUserData} from "@/interfaces/iRegisterUser";
 import {jwtDecode} from "jwt-decode";
@@ -60,7 +60,7 @@ export const QuizUi = () => {
 
     //Variables
     const {push} = useRouter();
-    const {userData}: jwtUserData = getCooki('token') ? jwtDecode(getCooki('token')!) : {};
+    const {userData}: jwtUserData = getCookie('token') ? jwtDecode(getCookie('token')!) : {};
     const dispatch = useDispatch();
     const quizCategories = quizData.map((quiz) => {
         return quiz.questions[0]
@@ -174,6 +174,7 @@ export const QuizUi = () => {
                 if (returnedCourses) {
                     dispatch(_setRecommCourses(returnedCourses))
                 }
+                // TODO() - Update User's Entry test in DB
                 dispatch(_setUserEntryTest(true))
                 push('/dashboard')
             } else {

@@ -3,13 +3,14 @@ import {useState} from "react";
 import {Formik, FormikValues} from "formik";
 import {LoginSchema, LoginType} from "@/schema/LoginSchema";
 import {RegisterSchema, RegisterType} from "@/schema/RegisterSchema";
-import {loginUser, registerUser} from "@/controller/userController";
+import {getAllCoursesWithoutPagination, loginUser, registerUser} from "@/controller/userController";
 import Image from "next/image";
 import {useRouter} from 'next/navigation';
-import {notifySuccess, notifyError, createCookie, getCooki} from "@/util/Common";
+import {notifySuccess, notifyError, createCookie, getCookie} from "@/util/Common";
 import {useDispatch} from "react-redux";
 import {_setUser, _setUserEntryTest} from "../../../redux/store/slices/userReducer";
 import './page.css'
+import {_setDefaultCourses} from "../../../redux/store/slices/courseReducer";
 
 export default function Page() {
     // States
@@ -18,7 +19,7 @@ export default function Page() {
     // Variables
     const {push} = useRouter();
     const dispatch = useDispatch();
-    const isLoggedIn = !!(getCooki('token'))
+    const isLoggedIn = !!(getCookie('token'))
 
     const handleSignUp = () => {
         const loginContainer = (document.getElementById("loginContainer") as HTMLElement);
@@ -60,18 +61,17 @@ export default function Page() {
         await loginUser(email, password).then((res) => {
             if (res?.data) {
                 notifySuccess(res.message)
-                console.log("res?.data.user", res?.data?.user)
                 dispatch(_setUser(res?.data?.user))
                 dispatch(_setUserEntryTest(res?.data?.user?.entryTest))
-                // if(!isLoggedIn){ // If localStorage already has token, it will not re-set it.
-                //     localStorage.setItem('token', res.data.token)
-                // }
                 createCookie("token", res?.data?.token, 1440)
                 push('/dashboard')
             } else {
                 notifyError(res.message)
             }
         })
+        await getAllCoursesWithoutPagination().then(response => {
+            dispatch(_setDefaultCourses(response.data.results))
+        }).catch(error => console.error("getAllCoursesWithoutPagination: ", error))
     }
 
     const validateRegister = (values: FormikValues) => {
@@ -88,8 +88,7 @@ export default function Page() {
     }
 
     return (
-        <>
-
+        <>{isLoggedIn ? (push('/dashboard')) : (
             <div className="relative top-24 left-[15%] w-[100%] bg-red-600 rounded-2xl shadow-xl drop-shadow-lg">
                 <Image src="/logo.png" width="65" height="65"
                        className="absolute z-[100] animate-bounce right-[32%] bottom-[-6vh]" alt="logo"/>
@@ -256,6 +255,7 @@ export default function Page() {
                     </div>
                 </div>
             </div>
+        )}
         </>
     )
 }

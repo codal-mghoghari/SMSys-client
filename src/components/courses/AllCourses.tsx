@@ -26,11 +26,11 @@ export const AllCourses = (props: {
                     onClick={handleAllCourses}/>
             </div>
             <main
-                  className={`user transition-all duration-[250ms] ease-in max-w-full ${hideAllCourses ? 'h-[0vh]' : '2xl:h-[27vh] lg:h-[100vh] md:h-[100vh]'} flex relative overflow-hidden`}>
-                <div id="opt-course-container"
-                     className="w-full m-4 flex flex-wrap items-start justify-start rounded-tl gap-4 overflow-y-scroll">
-                    {
-                        props.title === "Recommended Courses" && (
+                className={`user transition-all duration-[250ms] ease-in max-w-full ${hideAllCourses ? 'h-[0vh]' : '2xl:h-[100%] lg:h-[100vh] md:h-[100vh]'} flex relative overflow-hidden`}>
+                {props.title === "Recommended Courses" && (
+                    <div id="recomm-course-container"
+                         className="w-full m-4 flex flex-wrap items-start justify-start rounded-tl gap-4 overflow-y-scroll">
+                        {
                             Object.keys(props.quizCats).filter((itm) => props.quizCats[itm] > 0).map((cat, index) => {
                                 return (
                                     <div key={index}
@@ -43,18 +43,22 @@ export const AllCourses = (props: {
                                                 className="font-bold  text-4xl text-center text-white">{cat} Course</span>
                                             <span
                                                 className="text-xl font-medium text-center text-white"> Here, you will learn {cat} concepts and more..</span>
-                                            <ToggleBtn id={cat} name={index.toString()} handleChange={(e) => props.btnHandler(e)}/>
+                                            <ToggleBtn id={cat} handleChange={(e) => props.btnHandler(e)}/>
                                         </div>
                                     </div>
                                 )
                             })
-                        )
-                    }
-                    {
-                        props.title === "All Courses" && (
+
+                        }
+                    </div>
+                )}
+                {props.title === "All Courses" && (
+                    <div id="all-course-container"
+                         className="w-full m-4 flex flex-wrap items-start justify-start rounded-tl gap-4 overflow-y-scroll">
+                        {
                             Object.keys(props.quizCats).map((cat, index) => {
                                 return (
-                                    <div key={index}
+                                    <div key={index + 100}
                                          className="relative group flex justify-center items-center 2xl:w-auto lg:w-96 2xl:h-60 lg:h-56 rounded-lg flex-shrink-0 flex-grow bg-courseImage bg-cover opacity-80 cursor-pointer">
                                         <span
                                             className="absolute font-bold group-hover:opacity-0 text-4xl text-center text-white">{cat} Course</span>
@@ -64,16 +68,16 @@ export const AllCourses = (props: {
                                                 className="font-bold  text-4xl text-center text-white">{cat} Course</span>
                                             <span
                                                 className="text-xl font-medium text-center text-white"> Here, you will learn {cat} concepts and more..</span>
-                                            <ToggleBtn id={cat} name={index.toString()} handleChange={(e) => props.btnHandler(e)}/>
+                                            <ToggleBtn id={"allCourses-" + cat}
+                                                       handleChange={(e) => props.btnHandler(e)}/>
                                         </div>
                                     </div>
                                 )
                             })
-                        )
-                    }
-                </div>
+                        }
+                    </div>
+                )}
             </main>
-
         </>
     );
 };

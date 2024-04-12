@@ -1,11 +1,11 @@
 "use client";
 import {useRouter} from 'next/navigation';
-import {getCooki} from "@/util/Common";
+import {getCookie} from "@/util/Common";
 
 export default function Home() {
     //Variables
     const {push} = useRouter();
-    const isLoggedIn = !!(getCooki('token')!)
+    const isLoggedIn = !!(getCookie('token')!)
 
     return (
         <>

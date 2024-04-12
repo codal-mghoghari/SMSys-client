@@ -3,23 +3,25 @@
 import {useRouter} from "next/navigation";
 import {jwtUserData, RegisteredUserData} from "@/interfaces/iRegisterUser";
 import {jwtDecode} from "jwt-decode";
-import {capitalizeEachWord, getCooki} from "@/util/Common";
+import {capitalizeEachWord, createCookie, getCookie} from "@/util/Common";
 import {Aside} from "@/components/Aside";
 import {DashboardContent} from "@/components/DashboardContent";
 import {ChangeEvent, useEffect, useRef, useState} from "react";
-import {updateUserCourse} from "@/controller/userController";
+import {addUserCourse, deleteUserCourse} from "@/controller/userController";
 import {notifySuccess, notifyError} from "@/util/Common";
 import {useDispatch, useSelector} from "react-redux";
 import {rootStateType} from "../../../redux/store/mainStore";
-import {_setUserCourses} from "../../../redux/store/slices/userReducer";
+import {_setUser, _setUserCourses} from "../../../redux/store/slices/userReducer";
 import defaultConfig from "../../configuration/defaultConfig.json"
 import "./page.css"
 import {StringIndexable} from "@/util/Util";
+import {coursesType} from "../../../redux/store/slices/courseReducer";
 
 export default function Page() {
     //Global preload
-    const isLoggedIn = !!getCooki('token');
+    const isLoggedIn = !!getCookie('token');
     const userDataSelector: RegisteredUserData = useSelector((state: rootStateType) => state.user.loggedInUserData);
+    const courseDataSelector: coursesType = useSelector((state: rootStateType) => state.course);
     const entryTest: boolean = useSelector((state: rootStateType) => state.user.entryTest);
 
     //Local States
@@ -29,61 +31,77 @@ export default function Page() {
     const [opted, setOpted] = useState<string[]>([])
     const [unOpted, setUnOpted] = useState<string[]>([])
 
+
     //Variables
     const {push} = useRouter();
-    const {userData}: jwtUserData = isLoggedIn ? jwtDecode(getCooki('token')!) : {}
+    const {userData}: jwtUserData = isLoggedIn ? jwtDecode(getCookie('token')!) : {}
     const prevOptedCourses = useRef(optedCourses);
     const saveOptedCourses = typeof window !== undefined ? (document.getElementById('saveOptedCourses') as HTMLElement) : null
     const dispatch = useDispatch();
 
     const tickHandler = (e: ChangeEvent<HTMLInputElement>) => {
         const checked = (e.target as HTMLInputElement).checked;
+        console.log('checked', e.target.id);
+        let id = e.target.id.split('-')[1] ? e.target.id.split('-')[1] : e.target.id
         setOptedCourses({
             ...optedCourses,
-            [e.target.name]: checked,
+            [id]: checked,
+        })
+        //TODO - Fetch the selected/Opted courses from DB
+    }
+    const getDefaultCourseUUIDByName = (name: string) => {
+        return courseDataSelector.courses.defaultCourses.find(course => {
+            return course.course === name && course.id
         })
     }
 
     useEffect(() => {
-        console.log("D: ", opted, unOpted)
-        if(opted){
+        if (opted) {
             setTimeout(async () => {
                 for (const opt of opted) {
-                    console.log("opt: ", opt)
-                    await updateUserCourse({courseId: opt}, userData?.id!).then(res => {
-                        if (res.data) {
-                            console.log("OPTED RES:", res)
-                            notifySuccess(res.message)
-                            // dispatch(_setUserCourses(JSON.stringify(optedCourses)))
-                        } else {
-                            console.error(res)
-                            notifyError(res.message)
-                        }
-                    })
+                    let courseUUID = getDefaultCourseUUIDByName(opt)
+                    if (courseUUID) {
+                        await addUserCourse({courseId: courseUUID?.id}, (userData?.id as number)).then(res => {
+                            if (res.data) {
+                                notifySuccess(res.message)
+                                dispatch(_setUserCourses(JSON.stringify(optedCourses)))
+                            } else {
+                                notifyError(res.message)
+                            }
+                        })
+                    }
                 }
-                saveOptedCourses?.classList.add('invisible')
+                if (!saveOptedCourses?.classList.contains('invisible')) {
+                    saveOptedCourses?.classList.add('invisible')
+                }
                 prevOptedCourses.current = optedCourses
             }, 2000)
         }
-        if(unOpted){
+    }, [opted]);
+
+    useEffect(() => {
+        if (unOpted) {
             setTimeout(async () => {
                 for (const opt of unOpted) {
-                    await updateUserCourse({courseId: opt}, userData?.id!).then(res => {
-                        if (res.data) {
-                            notifySuccess(res.message)
-                            console.log("UNOPTED RES:", res)
-                            // dispatch(_setUserCourses(JSON.stringify(optedCourses)))
-                        } else {
-                            console.error(res)
-                            notifyError(res.message)
-                        }
-                    })
+                    let courseUUID = getDefaultCourseUUIDByName(opt)
+                    if (courseUUID) {
+                        await deleteUserCourse(courseUUID?.id).then(res => {
+                            if (res.status === "SUCCESS") {
+                                notifySuccess(res.message)
+                                dispatch(_setUserCourses(JSON.stringify(optedCourses)))
+                            } else {
+                                notifyError(res)
+                            }
+                        })
+                    }
                 }
-                saveOptedCourses?.classList.add('invisible')
+                if (!saveOptedCourses?.classList.contains('invisible')) {
+                    saveOptedCourses?.classList.add('invisible')
+                }
                 prevOptedCourses.current = optedCourses
             }, 2000)
         }
-    }, [opted, unOpted]);
+    }, [unOpted]);
 
 
     const handleSaveOptedCourses = () => {
@@ -101,12 +119,24 @@ export default function Page() {
         //     push('/entrytest')
         // }
 
-        let inputElements: StringIndexable = (document.getElementById('opt-course-container') as HTMLElement)?.getElementsByTagName('input')
-        for (let i = 0; i < inputElements?.length; i++) {
-            inputElements[i].checked = Object.values(optedCourses)[i]
+        let recommCoursesInputElements: StringIndexable = (document.getElementById('recomm-course-container') as HTMLElement)?.getElementsByTagName('input')
+        let allCoursesInputElements: StringIndexable = (document.getElementById('all-course-container') as HTMLElement)?.getElementsByTagName('input')
+        // let sameCourses = Object.keys(optedCourses).filter((course) => {
+        //     return course.split('-')[1]
+        // })
+        // console.log(sameCourses)
+        for (let i = 0; i < recommCoursesInputElements?.length; i++) {
+            recommCoursesInputElements[i].checked = optedCourses[recommCoursesInputElements[i].id]
         }
+        for (let i = 0; i < allCoursesInputElements?.length; i++) {
+            let id = allCoursesInputElements[i].id.split('-')[1]
+            allCoursesInputElements[i].checked = optedCourses[id]
+        }
+
+
         if (typeof window !== undefined) {
             const saveOptedCourses = (document.getElementById('saveOptedCourses') as HTMLElement)
+            console.log('prevOptedCourses.current', prevOptedCourses.current, optedCourses)
             if (JSON.stringify(prevOptedCourses.current) !== JSON.stringify(optedCourses)) {
                 saveOptedCourses?.classList.remove('invisible')
             } else {
@@ -124,6 +154,12 @@ export default function Page() {
         setActiveElem("settings")
     }
 
+    const handleLogout = () => {
+        dispatch(_setUser({}))
+        createCookie("token", '', 0) // Delete Token Cookie
+        push('/login')
+    }
+
     return (
         <>
             {
@@ -131,7 +167,7 @@ export default function Page() {
                     <>
                         <div className="h-screen w-full bg-white relative flex overflow-hidden">
                             <Aside active={activeElem} handleUserClick={handleUserClick}
-                                   handleSettingsClick={handleSettingsClick}/>
+                                   handleSettingsClick={handleSettingsClick} handleLogout={handleLogout}/>
                             <div className="relative w-full h-full flex flex-col">
                                 <span
                                     className="absolute left-0 top-3 z-10 text-white text-xl font-bold animate-pulse">{defaultConfig.websiteTitle}</span>
@@ -169,8 +205,6 @@ export default function Page() {
                                             className="text-white bg-gray-800 hover:bg-gray-900 transition-transform duration-[80ms] ease-in active:scale-[0.95] focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-full text-sm px-10 py-2.5 me-2 mb-2 mr-10">Save
                                         Changes
                                     </button>
-
-
                                 </div>
                             </div>
                         </div>

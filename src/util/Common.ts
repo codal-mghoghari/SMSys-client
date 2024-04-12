@@ -1,4 +1,7 @@
 import {Slide, toast} from "react-toastify";
+import {coursesType} from "../../redux/store/slices/courseReducer";
+import {useSelector} from "react-redux";
+import {rootStateType} from "../../redux/store/mainStore";
 
 export function createCookie(username: string, value: string, minutes: number) {
     let expires, date;
@@ -12,16 +15,20 @@ export function createCookie(username: string, value: string, minutes: number) {
     document.cookie = username + "=" + value + expires + "; path=/";
 }
 
-export function getCooki(name: string) {
-    if (typeof window !== "undefined") {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) {
-            return parts.pop()?.split(';').shift();
-        }
-        return null
-    }
-}
+// export function getCooki(name: string) {
+//     if (typeof window !== "undefined") {
+//         const value = `; ${document?.cookie}`;
+//         const parts = value?.split(`; ${name}=`);
+//         if (parts?.length === 2) {
+//             return parts?.pop()?.split(';')?.shift();
+//         }
+//         return null
+//     } else {
+//         return ""
+//     }
+// }
+
+export const getCookie = (name: string) => document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`))?.at(2);
 
 export function capitalizeEachWord(str: string) {
     let splitStr = str?.toLowerCase().split(' ');
@@ -30,6 +37,7 @@ export function capitalizeEachWord(str: string) {
     }
     return splitStr?.join(' ');
 }
+
 
 
 export const notifySuccess = (args: string) => toast.success(args, {

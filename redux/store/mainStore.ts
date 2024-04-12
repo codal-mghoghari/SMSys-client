@@ -4,6 +4,7 @@ import {persistStore, persistReducer} from 'redux-persist'
 import quizReducer from "./slices/quizReducer";
 
 import createWebStorage from "redux-persist/es/storage/createWebStorage";
+import courseReducer from "./slices/courseReducer";
 
 function createPersistStore() { //To fix the warning/error for falling back to noop-storage or usage of static storage.
     const isServer = typeof window === "undefined";
@@ -24,9 +25,6 @@ function createPersistStore() { //To fix the warning/error for falling back to n
 }
 
 const storage = typeof window !== "undefined" ? createWebStorage("local") : createPersistStore();
-
-const isClient = typeof window !== "undefined";
-
 //@ts-ignore
 export type rootStateType = ReturnType<typeof store.getState>;
 
@@ -45,9 +43,15 @@ const quizPersistConfig = {
     storage,
 }
 
+const coursePersistConfig = {
+    key: 'course',
+    storage,
+}
+
 const rootReducer = combineReducers({
     user: persistReducer(userPersistConfig, userReducer),
     quiz: persistReducer(quizPersistConfig, quizReducer),
+    course: persistReducer(coursePersistConfig, courseReducer),
 })
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)

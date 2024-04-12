@@ -1,6 +1,6 @@
 "use client";
 import {useRouter} from 'next/navigation';
-import {getCooki} from "@/util/Common";
+import {getCookie} from "@/util/Common";
 import {useEffect, useState} from "react";
 import {QuizUi} from "@/components/QuizUi";
 import quizData from "../../configuration/quiz.json"
@@ -16,7 +16,7 @@ export default function Home() {
     //Variables
     const dispatch = useDispatch();
     const {push} = useRouter();
-    const isLoggedIn = !!(getCooki('token')!)
+    const isLoggedIn = !!(getCookie('token')!)
 
     return (
         <>

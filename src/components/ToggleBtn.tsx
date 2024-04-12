@@ -3,7 +3,6 @@ import {ChangeEvent} from "react";
 
 export const ToggleBtn = (props: {
     id: string;
-    name: string;
     handleChange: (e: ChangeEvent<HTMLInputElement>) => void,
 }) => {
     return (
@@ -11,7 +10,6 @@ export const ToggleBtn = (props: {
             <div className="inline-flex items-center">
                 <div className="relative inline-block w-8 h-4 rounded-full cursor-pointer">
                     <input id={props.id} type="checkbox"
-                           name={props.name}
                            onChange={(e) => props.handleChange(e)}
                            className="absolute w-8 h-4 bg-gray-400 transition-colors duration-300 rounded-full appearance-none cursor-pointer peer bg-blue-gray-100 checked:bg-gray-900 peer-checked:border-gray-900 peer-checked:before:bg-gray-900"
                     />

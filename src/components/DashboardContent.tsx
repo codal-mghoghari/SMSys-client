@@ -33,8 +33,8 @@ export const DashboardContent = (props: {
         }
     }
 
-    const optedCourses = props?.userData?.optedCourses !== undefined ? JSON.parse(props?.userData?.optedCourses) : {}
-    const optedUserCourses = getKeysWithValueTrue(optedCourses)
+    const optedCourses = props?.userData?.optedCourses
+    const optedUserCourses = optedCourses?.map((data) => data.course)
 
     return (
         <>
@@ -241,7 +241,7 @@ export const DashboardContent = (props: {
                                                                className="block mb-2 text-sm font-medium text-custom-primary">
                                                             Opted Courses</label>
                                                         <div id='optedCourses' className="flex gap-2">
-                                                            {optedUserCourses.map((optedCourse: string, key: React.Key) => {
+                                                            {optedUserCourses?.map((optedCourse: string, key: React.Key) => {
                                                                 return (<span
                                                                         key={key}
                                                                         className="text-sm font-medium bg-gray-200 py-1 px-2 rounded text-gray-500 align-middle">{optedCourse.toString()}</span>

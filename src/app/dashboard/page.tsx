@@ -7,7 +7,7 @@ import {capitalizeEachWord, createCookie, getCookie} from "@/util/Common";
 import {Aside} from "@/components/Aside";
 import {DashboardContent} from "@/components/DashboardContent";
 import {ChangeEvent, useEffect, useRef, useState} from "react";
-import {addUserCourse, deleteUserCourse} from "@/controller/userController";
+import {addUserCourse, deleteUserCourse} from "@/controller/courseController";
 import {notifySuccess, notifyError} from "@/util/Common";
 import {useDispatch, useSelector} from "react-redux";
 import {rootStateType} from "../../../redux/store/mainStore";
@@ -26,7 +26,7 @@ export default function Page() {
 
     //Local States
     const [activeElem, setActiveElem] = useState("user");
-    const [optedCourses, setOptedCourses] = useState(userDataSelector.optedCourses === undefined ? ({}) : (JSON.parse(userDataSelector.optedCourses!)));
+    const [optedCourses, setOptedCourses] = useState(userDataSelector.optedCourses === undefined ? [{}] : userDataSelector.optedCourses)
 
     const [opted, setOpted] = useState<string[]>([])
     const [unOpted, setUnOpted] = useState<string[]>([])
@@ -36,18 +36,16 @@ export default function Page() {
     const {push} = useRouter();
     const {userData}: jwtUserData = isLoggedIn ? jwtDecode(getCookie('token')!) : {}
     const prevOptedCourses = useRef(optedCourses);
-    const saveOptedCourses = typeof window !== undefined ? (document.getElementById('saveOptedCourses') as HTMLElement) : null
+    const saveOptedCourses = typeof window !== "undefined" ? document?.getElementById('saveOptedCourses') as HTMLElement : null // TODO - Fix the Console Error - ReferenceError: location is not defined
     const dispatch = useDispatch();
 
     const tickHandler = (e: ChangeEvent<HTMLInputElement>) => {
         const checked = (e.target as HTMLInputElement).checked;
-        console.log('checked', e.target.id);
         let id = e.target.id.split('-')[1] ? e.target.id.split('-')[1] : e.target.id
         setOptedCourses({
             ...optedCourses,
             [id]: checked,
         })
-        //TODO - Fetch the selected/Opted courses from DB
     }
     const getDefaultCourseUUIDByName = (name: string) => {
         return courseDataSelector.courses.defaultCourses.find(course => {
@@ -105,14 +103,31 @@ export default function Page() {
 
 
     const handleSaveOptedCourses = () => {
-        console.log("optedCourses", optedCourses)
         setOpted(Object.keys(optedCourses).filter((key: string) => {
-            return optedCourses[key] === true && key
+            return (optedCourses as StringIndexable)[key] === true && key
         }))
         setUnOpted(Object.keys(optedCourses).filter((key: string) => {
-            return optedCourses[key] === false && key
+            return (optedCourses as StringIndexable)[key] === false && key
         }))
     }
+
+    // TODO()
+    // useEffect(() => {
+    //     let recommCoursesInputElements: StringIndexable = (document.getElementById('recomm-course-container') as HTMLElement)?.getElementsByTagName('input')
+    //     let allCoursesInputElements: StringIndexable = (document.getElementById('all-course-container') as HTMLElement)?.getElementsByTagName('input')
+    //
+    //     for (let i = 0; i < recommCoursesInputElements?.length; i++){
+    //         if(recommCoursesInputElements[i].id === (optedCourses as StringIndexable)[i]?.course){
+    //             recommCoursesInputElements[i].checked = true
+    //         }
+    //     }
+    //     for (let i = 0; i < allCoursesInputElements?.length; i++) {
+    //         let id = allCoursesInputElements[i].id.split('-')[1]
+    //         if(id === (optedCourses as StringIndexable)[i]?.course){
+    //             allCoursesInputElements[i].checked = true
+    //         }
+    //     }
+    // }, []);
 
     useEffect(() => {
         // if (!entryTest) { // If user is logged-in but has not given the entry test yet, shall be redirected to EntryTest page.

@@ -3,14 +3,16 @@ import {useState} from "react";
 import {Formik, FormikValues} from "formik";
 import {LoginSchema, LoginType} from "@/schema/LoginSchema";
 import {RegisterSchema, RegisterType} from "@/schema/RegisterSchema";
-import {getAllCoursesWithoutPagination, loginUser, registerUser} from "@/controller/userController";
+import {loginUser, registerUser} from "@/controller/userController";
+import {getAllCoursesWithoutPagination, getAllOptedCourses, getUserOptedCourses} from "@/controller/courseController";
 import Image from "next/image";
 import {useRouter} from 'next/navigation';
 import {notifySuccess, notifyError, createCookie, getCookie} from "@/util/Common";
 import {useDispatch} from "react-redux";
-import {_setUser, _setUserEntryTest} from "../../../redux/store/slices/userReducer";
+import {_setUser, _setUserCourses, _setUserEntryTest} from "../../../redux/store/slices/userReducer";
 import './page.css'
 import {_setDefaultCourses} from "../../../redux/store/slices/courseReducer";
+import {RegisteredUserData} from "@/interfaces/iRegisterUser";
 
 export default function Page() {
     // States
@@ -57,21 +59,31 @@ export default function Page() {
     }
 
     const validateLogin = async (values: FormikValues) => {
-        const {email, password} = values
-        await loginUser(email, password).then((res) => {
-            if (res?.data) {
-                notifySuccess(res.message)
-                dispatch(_setUser(res?.data?.user))
-                dispatch(_setUserEntryTest(res?.data?.user?.entryTest))
-                createCookie("token", res?.data?.token, 1440)
-                push('/dashboard')
-            } else {
-                notifyError(res.message)
-            }
-        })
-        await getAllCoursesWithoutPagination().then(response => {
-            dispatch(_setDefaultCourses(response.data.results))
-        }).catch(error => console.error("getAllCoursesWithoutPagination: ", error))
+        try {
+            const {email, password} = values
+            let id: number
+            await loginUser(email, password).then((res) => {
+                if (res?.data) {
+                    id = res?.data?.user.id
+                    getUserOptedCourses(id).then(response => {
+                        dispatch(_setUserCourses(response.data))
+                    })
+                    notifySuccess(res.message)
+                    dispatch(_setUser(res?.data?.user))
+                    dispatch(_setUserEntryTest(res?.data?.user?.entryTest))
+                    createCookie("token", res?.data?.token, 1440)
+                } else {
+                    notifyError(res.message)
+                }
+            })
+            await getAllCoursesWithoutPagination().then(response => {
+                dispatch(_setDefaultCourses(response.data.results))
+            }).catch(error => console.error("getAllCoursesWithoutPagination: ", error))
+            push('/dashboard')
+        } catch (err) {
+            console.log("ValidateLogin Error: ", err)
+            return err
+        }
     }
 
     const validateRegister = (values: FormikValues) => {

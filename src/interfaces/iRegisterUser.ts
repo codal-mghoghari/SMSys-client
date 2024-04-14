@@ -16,7 +16,10 @@ export type RegisteredUserData = {
     password?: string,
     role?: number,
     updatedAt?: string,
-    optedCourses?: string,
+    optedCourses?: [{
+        course: string,
+        id: string
+    }]
 }
 
 export interface iRegisterUser {

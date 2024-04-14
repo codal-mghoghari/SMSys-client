@@ -2,6 +2,7 @@ import {Slide, toast} from "react-toastify";
 import {coursesType} from "../../redux/store/slices/courseReducer";
 import {useSelector} from "react-redux";
 import {rootStateType} from "../../redux/store/mainStore";
+import {type} from "node:os";
 
 export function createCookie(username: string, value: string, minutes: number) {
     let expires, date;
@@ -28,7 +29,7 @@ export function createCookie(username: string, value: string, minutes: number) {
 //     }
 // }
 
-export const getCookie = (name: string) => document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`))?.at(2);
+export const getCookie = (name: string) => typeof window !== "undefined" ? document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`))?.at(2) : null;
 
 export function capitalizeEachWord(str: string) {
     let splitStr = str?.toLowerCase().split(' ');

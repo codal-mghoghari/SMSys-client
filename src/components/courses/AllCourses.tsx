@@ -2,11 +2,13 @@ import {ToggleBtn} from "@/components/ToggleBtn";
 import React, {ChangeEvent} from "react";
 import {IoIosArrowDown} from "react-icons/io";
 import {StringIndexable} from "@/util/Util";
+import {coursesType} from "../../../redux/store/slices/courseReducer";
 
 export const AllCourses = (props: {
     title: string,
     allQuizData: Object,
-    quizCats: StringIndexable,
+    courses?: coursesType | StringIndexable,
+    recommCourses?: StringIndexable,
     btnHandler: (e: ChangeEvent<HTMLInputElement>) => void
 }) => {
     //States
@@ -16,7 +18,7 @@ export const AllCourses = (props: {
         setHideAllCourses(!hideAllCourses);
     }
 
-
+    console.log("props?.courses?.courses?.defaultCourses", props?.courses?.courses)
     return (
         <>
             <div className="flex flex-row items-center gap-3 m-4">
@@ -31,7 +33,7 @@ export const AllCourses = (props: {
                     <div id="recomm-course-container"
                          className="w-full m-4 flex flex-wrap items-start justify-start rounded-tl gap-4 overflow-y-scroll">
                         {
-                            Object.keys(props.quizCats).filter((itm) => props.quizCats[itm] > 0).map((cat, index) => {
+                            Object.keys(props?.recommCourses!).filter((itm) => props?.recommCourses![itm] > 0).map((cat, index) => {
                                 return (
                                     <div key={index}
                                          className="relative group flex justify-center items-center 2xl:w-auto lg:w-96 2xl:h-60 lg:h-56 rounded-lg flex-shrink-0 flex-grow bg-courseImage bg-cover opacity-80 cursor-pointer">
@@ -56,19 +58,22 @@ export const AllCourses = (props: {
                     <div id="all-course-container"
                          className="w-full m-4 flex flex-wrap items-start justify-start rounded-tl gap-4 overflow-y-scroll">
                         {
-                            Object.keys(props.quizCats).map((cat, index) => {
+                            props?.courses?.courses?.defaultCourses.map((cat: {
+                                id?: string,
+                                course?: string,
+                            }, index: number) => {
                                 return (
                                     <div key={index + 100}
                                          className="relative group flex justify-center items-center 2xl:w-auto lg:w-96 2xl:h-60 lg:h-56 rounded-lg flex-shrink-0 flex-grow bg-courseImage bg-cover opacity-80 cursor-pointer">
                                         <span
-                                            className="absolute font-bold group-hover:opacity-0 text-4xl text-center text-white">{cat} Course</span>
+                                            className="absolute font-bold group-hover:opacity-0 text-4xl text-center text-white">{cat.course} Course</span>
                                         <div
                                             className="flex gap-2 flex-col justify-center items-center opacity-0 group-hover:opacity-100 group-hover:transition-all group-hover:duration-500 group-hover:ease-linear">
                                             <span
-                                                className="font-bold  text-4xl text-center text-white">{cat} Course</span>
+                                                className="font-bold  text-4xl text-center text-white">{cat.course} Course</span>
                                             <span
-                                                className="text-xl font-medium text-center text-white"> Here, you will learn {cat} concepts and more..</span>
-                                            <ToggleBtn id={"allCourses-" + cat}
+                                                className="text-xl font-medium text-center text-white"> Here, you will learn {cat.course} concepts and more..</span>
+                                            <ToggleBtn id={"allCourses-" + cat.course}
                                                        handleChange={(e) => props.btnHandler(e)}/>
                                         </div>
                                     </div>

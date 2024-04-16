@@ -1,8 +1,4 @@
 import {Slide, toast} from "react-toastify";
-import {coursesType} from "../../redux/store/slices/courseReducer";
-import {useSelector} from "react-redux";
-import {rootStateType} from "../../redux/store/mainStore";
-import {type} from "node:os";
 
 export function createCookie(username: string, value: string, minutes: number) {
     let expires, date;

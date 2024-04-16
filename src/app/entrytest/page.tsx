@@ -12,11 +12,18 @@ import {rootStateType} from "../../../redux/store/mainStore";
 export default function Home() {
     //Global
     const quizSelector: StringIndexable = useSelector((state: rootStateType) => state.quiz.quizData);
+    const entryTest: boolean = useSelector((state: rootStateType) => state.user.entryTest);
 
     //Variables
     const dispatch = useDispatch();
     const {push} = useRouter();
     const isLoggedIn = !!(getCookie('token')!)
+
+    useEffect(() => {
+        if(entryTest){
+            push('/dashboard')
+        }
+    }, []);
 
     return (
         <>

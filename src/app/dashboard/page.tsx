@@ -6,8 +6,13 @@ import {jwtDecode} from "jwt-decode";
 import {capitalizeEachWord, createCookie, getCookie} from "@/util/Common";
 import {Aside} from "@/components/Aside";
 import {DashboardContent} from "@/components/DashboardContent";
-import {ChangeEvent, useEffect, useRef, useState} from "react";
-import {addUserCourse, deleteUserCourse} from "@/controller/courseController";
+import {ChangeEvent, MouseEventHandler, useEffect, useRef, useState} from "react";
+import {
+    addUserCourse,
+    deleteUserCourse,
+    getAllCoursesWithoutPagination,
+    getUserOptedCourses
+} from "@/controller/courseController";
 import {notifySuccess, notifyError} from "@/util/Common";
 import {useDispatch, useSelector} from "react-redux";
 import {rootStateType} from "../../../redux/store/mainStore";
@@ -15,7 +20,7 @@ import {_setUser, _setUserCourses} from "../../../redux/store/slices/userReducer
 import defaultConfig from "../../configuration/defaultConfig.json"
 import "./page.css"
 import {StringIndexable} from "@/util/Util";
-import {coursesType} from "../../../redux/store/slices/courseReducer";
+import {_setDefaultCourses, coursesType} from "../../../redux/store/slices/courseReducer";
 
 export default function Page() {
     //Global preload
@@ -26,133 +31,183 @@ export default function Page() {
 
     //Local States
     const [activeElem, setActiveElem] = useState("user");
-    const [optedCourses, setOptedCourses] = useState(userDataSelector.optedCourses === undefined ? [{}] : userDataSelector.optedCourses)
-
-    const [opted, setOpted] = useState<string[]>([])
-    const [unOpted, setUnOpted] = useState<string[]>([])
-
+    const [optedCourses, setOptedCourses] = useState({
+        course: userDataSelector?.optedCourses?.course ? userDataSelector?.optedCourses?.course : []
+    });
+    const [saveDisable, setSaveDisable] = useState<boolean>(false);
+    const [opted, setOpted] = useState<Array<string>>([])
+    const [unOpted, setUnOpted] = useState<Array<string>>([])
 
     //Variables
     const {push} = useRouter();
     const {userData}: jwtUserData = isLoggedIn ? jwtDecode(getCookie('token')!) : {}
-    const prevOptedCourses = useRef(optedCourses);
+    const [prevOptedCourses, setPrevOptedCourses] = useState(optedCourses);
     const saveOptedCourses = typeof window !== "undefined" ? document?.getElementById('saveOptedCourses') as HTMLElement : null // TODO - Fix the Console Error - ReferenceError: location is not defined
     const dispatch = useDispatch();
+
+    //TODO() - Calling API every reload, should not be done. Set it at login time.
+    const getDefaults = async () => {
+        await getUserOptedCourses(userDataSelector?.id!).then(response => {
+            if (response?.data) {
+                let res = response?.data?.map((elm: any) => elm.course)
+                dispatch(_setUserCourses({course: res}))
+            } else {
+                dispatch(_setUserCourses({course: []}))
+            }
+        }).catch(error => console.error("getUserOptedCourses: ", error))
+        await getAllCoursesWithoutPagination().then(response => {
+            dispatch(_setDefaultCourses(response?.data?.results))
+        }).catch(error => console.error("getAllCoursesWithoutPagination: ", error))
+    }
+
+    useEffect(() => {
+        getDefaults()
+    }, []);
 
     const tickHandler = (e: ChangeEvent<HTMLInputElement>) => {
         const checked = (e.target as HTMLInputElement).checked;
         let id = e.target.id.split('-')[1] ? e.target.id.split('-')[1] : e.target.id
-        setOptedCourses({
-            ...optedCourses,
-            [id]: checked,
-        })
+        if (checked) {
+            console.log("asda", [...optedCourses?.course])
+            let tempArr = [...optedCourses?.course]
+            tempArr?.push(id)
+            setOpted(tempArr)
+            setOptedCourses(prevState => {
+                // prevOptedCourses.current = prevState
+                return {
+                    ...optedCourses,
+                    course: tempArr,
+                }
+            })
+        } else {
+            let tempArr = [...optedCourses?.course]
+            tempArr?.splice(tempArr?.indexOf(id), 1)
+            let delArr = []
+            delArr.push(id)
+            setUnOpted(delArr)
+            setOptedCourses(prevState => {
+                // prevOptedCourses.current = prevState
+                return {
+                    ...optedCourses,
+                    course: tempArr,
+                }
+            })
+
+        }
     }
+
     const getDefaultCourseUUIDByName = (name: string) => {
         return courseDataSelector.courses.defaultCourses.find(course => {
             return course.course === name && course.id
         })
     }
 
-    useEffect(() => {
-        if (opted) {
-            setTimeout(async () => {
-                for (const opt of opted) {
-                    let courseUUID = getDefaultCourseUUIDByName(opt)
-                    if (courseUUID) {
-                        await addUserCourse({courseId: courseUUID?.id}, (userData?.id as number)).then(res => {
-                            if (res.data) {
-                                notifySuccess(res.message)
-                                dispatch(_setUserCourses(JSON.stringify(optedCourses)))
-                            } else {
-                                notifyError(res.message)
-                            }
-                        })
+    const optCourse = () => {
+        try {
+            if (opted) {
+                setSaveDisable(true)
+                console.log('Opted')
+                setTimeout(async () => {
+                    for (const opt of opted) {
+                        let courseUUID = getDefaultCourseUUIDByName(opt)
+                        if (courseUUID) {
+                            await addUserCourse({courseId: courseUUID?.id}, (userData?.id as number)).then(res => {
+                                if (res.data) {
+                                    notifySuccess(res.message)
+                                    dispatch(_setUserCourses(optedCourses))
+                                } else {
+                                    notifyError(res.message)
+                                }
+                            })
+                        }
                     }
-                }
-                if (!saveOptedCourses?.classList.contains('invisible')) {
-                    saveOptedCourses?.classList.add('invisible')
-                }
-                prevOptedCourses.current = optedCourses
-            }, 2000)
+                    if (!saveOptedCourses?.classList.contains('invisible')) {
+                        saveOptedCourses?.classList.add('invisible')
+                    }
+                    setOpted([])
+                    setPrevOptedCourses(optedCourses)
+                    setSaveDisable(false)
+                }, 2000)
+            }
+        } catch (err) {
+            console.error("Opted Course Error: ", err)
         }
-    }, [opted]);
+    }
 
-    useEffect(() => {
-        if (unOpted) {
-            setTimeout(async () => {
-                for (const opt of unOpted) {
-                    let courseUUID = getDefaultCourseUUIDByName(opt)
-                    if (courseUUID) {
-                        await deleteUserCourse(courseUUID?.id).then(res => {
-                            if (res.status === "SUCCESS") {
-                                notifySuccess(res.message)
-                                dispatch(_setUserCourses(JSON.stringify(optedCourses)))
-                            } else {
-                                notifyError(res)
-                            }
-                        })
+    const unOptCourse = () => {
+        try {
+            if (unOpted) {
+                setSaveDisable(true)
+                console.log("unOpted")
+                setTimeout(async () => {
+                    for (const opt of unOpted) {
+                        let courseUUID = getDefaultCourseUUIDByName(opt)
+                        if (courseUUID) {
+                            await deleteUserCourse(courseUUID?.id).then(res => {
+                                if (res.status === "SUCCESS") {
+                                    notifySuccess(res.message)
+                                    dispatch(_setUserCourses(optedCourses))
+                                } else {
+                                    notifyError(res)
+                                }
+                            })
+                        }
                     }
-                }
-                if (!saveOptedCourses?.classList.contains('invisible')) {
-                    saveOptedCourses?.classList.add('invisible')
-                }
-                prevOptedCourses.current = optedCourses
-            }, 2000)
+                    if (!saveOptedCourses?.classList.contains('invisible')) {
+                        saveOptedCourses?.classList.add('invisible')
+                    }
+                    setUnOpted([])
+                    setPrevOptedCourses(optedCourses)
+                    setSaveDisable(false)
+                }, 2000)
+            }
+        } catch (err) {
+            console.error("Opted Course Error:", err)
         }
-    }, [unOpted]);
+    }
 
 
     const handleSaveOptedCourses = () => {
-        setOpted(Object.keys(optedCourses).filter((key: string) => {
-            return (optedCourses as StringIndexable)[key] === true && key
-        }))
-        setUnOpted(Object.keys(optedCourses).filter((key: string) => {
-            return (optedCourses as StringIndexable)[key] === false && key
-        }))
+        if (unOpted.length > 0) {
+            unOptCourse()
+        }
+        if (opted.length > 0) {
+            optCourse()
+        }
     }
 
-    // TODO()
-    // useEffect(() => {
-    //     let recommCoursesInputElements: StringIndexable = (document.getElementById('recomm-course-container') as HTMLElement)?.getElementsByTagName('input')
-    //     let allCoursesInputElements: StringIndexable = (document.getElementById('all-course-container') as HTMLElement)?.getElementsByTagName('input')
-    //
-    //     for (let i = 0; i < recommCoursesInputElements?.length; i++){
-    //         if(recommCoursesInputElements[i].id === (optedCourses as StringIndexable)[i]?.course){
-    //             recommCoursesInputElements[i].checked = true
-    //         }
-    //     }
-    //     for (let i = 0; i < allCoursesInputElements?.length; i++) {
-    //         let id = allCoursesInputElements[i].id.split('-')[1]
-    //         if(id === (optedCourses as StringIndexable)[i]?.course){
-    //             allCoursesInputElements[i].checked = true
-    //         }
-    //     }
-    // }, []);
-
     useEffect(() => {
-        // if (!entryTest) { // If user is logged-in but has not given the entry test yet, shall be redirected to EntryTest page.
-        //     push('/entrytest')
-        // }
-
-        let recommCoursesInputElements: StringIndexable = (document.getElementById('recomm-course-container') as HTMLElement)?.getElementsByTagName('input')
-        let allCoursesInputElements: StringIndexable = (document.getElementById('all-course-container') as HTMLElement)?.getElementsByTagName('input')
-        // let sameCourses = Object.keys(optedCourses).filter((course) => {
-        //     return course.split('-')[1]
-        // })
-        // console.log(sameCourses)
-        for (let i = 0; i < recommCoursesInputElements?.length; i++) {
-            recommCoursesInputElements[i].checked = optedCourses[recommCoursesInputElements[i].id]
+        if (!entryTest) { // If user is logged-in but has not given the entry test yet, shall be redirected to EntryTest page.
+            push('/entrytest')
         }
-        for (let i = 0; i < allCoursesInputElements?.length; i++) {
-            let id = allCoursesInputElements[i].id.split('-')[1]
-            allCoursesInputElements[i].checked = optedCourses[id]
-        }
-
 
         if (typeof window !== undefined) {
+            let recommCoursesInputElements = (document.getElementById('recomm-course-container') as HTMLElement)?.getElementsByTagName('input')
+            let allCoursesInputElements = (document.getElementById('all-course-container') as HTMLElement)?.getElementsByTagName('input')
+
+            Array.from((recommCoursesInputElements)).map(elem => {
+                let index = optedCourses?.course?.indexOf(elem.id)
+                if (index !== -1) {
+                    elem.checked = optedCourses.course && elem.id === (optedCourses as StringIndexable)?.course[index];
+                } else {
+                    elem.checked = false
+                }
+            })
+
+            Array.from((allCoursesInputElements)).map(elem => {
+                let id = elem.id.split('-')[1]
+                let index = optedCourses?.course?.indexOf(id)
+                if (index !== -1) {
+                    elem.checked = optedCourses.course && id === (optedCourses as StringIndexable)?.course[index];
+                } else {
+                    elem.checked = false
+                }
+            })
+
+
             const saveOptedCourses = (document.getElementById('saveOptedCourses') as HTMLElement)
-            console.log('prevOptedCourses.current', prevOptedCourses.current, optedCourses)
-            if (JSON.stringify(prevOptedCourses.current) !== JSON.stringify(optedCourses)) {
+            console.log('prevOptedCourses, current', prevOptedCourses, optedCourses)
+            if (JSON.stringify(prevOptedCourses) !== JSON.stringify(optedCourses)) {
                 saveOptedCourses?.classList.remove('invisible')
             } else {
                 saveOptedCourses?.classList.add('invisible')
@@ -216,6 +271,7 @@ export default function Page() {
                                      transition-all duration-300 ease-in-out
                                      "> {/* If optedCourses changes, shows a row for saving it!*/}
                                     <button type="button"
+                                            disabled={saveDisable}
                                             onClick={handleSaveOptedCourses}
                                             className="text-white bg-gray-800 hover:bg-gray-900 transition-transform duration-[80ms] ease-in active:scale-[0.95] focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-full text-sm px-10 py-2.5 me-2 mb-2 mr-10">Save
                                         Changes

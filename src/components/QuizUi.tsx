@@ -11,11 +11,10 @@ import {
     _removeUnAnsweredQuestions, _resetUnAnsweredQuestions, _setRecommCourses
 } from "../../redux/store/slices/quizReducer";
 import {rootStateType} from "../../redux/store/mainStore";
-import {toast} from "react-toastify";
 import {getCookie, notifyError, notifySuccess} from "@/util/Common";
 import SubmitDialog from "@/components/SubmitDialog";
 import {updateUserEntryTest} from "@/controller/userController";
-import {_setUserCourses, _setUserEntryTest} from "../../redux/store/slices/userReducer";
+import {_setUserEntryTest} from "../../redux/store/slices/userReducer";
 import {jwtUserData} from "@/interfaces/iRegisterUser";
 import {jwtDecode} from "jwt-decode";
 import {useRouter} from "next/navigation";
@@ -169,17 +168,18 @@ export const QuizUi = () => {
         e.preventDefault()
         await updateUserEntryTest(true, userData?.id!).then(res => {
             if (res.data) {
-                // notifySuccess(res.message)
                 let returnedCourses = genRecommendedCourses({answeredSelector, unAnsweredSelector, Questions})
                 if (returnedCourses) {
                     dispatch(_setRecommCourses(returnedCourses))
                 }
-                // TODO() - Update User's Entry test in DB
                 dispatch(_setUserEntryTest(true))
+                notifySuccess(res.message)
                 push('/dashboard')
             } else {
                 notifyError(res.message)
             }
+        }).catch((err) => {
+            console.error("Quiz Form Submit:", err)
         })
     }
 

@@ -1,5 +1,5 @@
 "use client";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Formik, FormikValues} from "formik";
 import {LoginSchema, LoginType} from "@/schema/LoginSchema";
 import {RegisterSchema, RegisterType} from "@/schema/RegisterSchema";
@@ -8,11 +8,12 @@ import {getAllCoursesWithoutPagination, getAllOptedCourses, getUserOptedCourses}
 import Image from "next/image";
 import {useRouter} from 'next/navigation';
 import {notifySuccess, notifyError, createCookie, getCookie} from "@/util/Common";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {_setUser, _setUserCourses, _setUserEntryTest} from "../../../redux/store/slices/userReducer";
 import './page.css'
 import {_setDefaultCourses} from "../../../redux/store/slices/courseReducer";
 import {RegisteredUserData} from "@/interfaces/iRegisterUser";
+import {rootStateType} from "../../../redux/store/mainStore";
 
 export default function Page() {
     // States
@@ -22,6 +23,7 @@ export default function Page() {
     const {push} = useRouter();
     const dispatch = useDispatch();
     const isLoggedIn = !!(getCookie('token'))
+    const userDataSelector: RegisteredUserData = useSelector((state: rootStateType) => state.user.loggedInUserData);
 
     const handleSignUp = () => {
         const loginContainer = (document.getElementById("loginContainer") as HTMLElement);
@@ -61,24 +63,16 @@ export default function Page() {
     const validateLogin = async (values: FormikValues) => {
         try {
             const {email, password} = values
-            let id: number
-            await loginUser(email, password).then((res) => {
+            await loginUser(email, password).then(async (res) => {
                 if (res?.data) {
-                    id = res?.data?.user.id
-                    getUserOptedCourses(id).then(response => {
-                        dispatch(_setUserCourses(response.data))
-                    })
-                    notifySuccess(res.message)
                     dispatch(_setUser(res?.data?.user))
-                    dispatch(_setUserEntryTest(res?.data?.user?.entryTest))
+                    dispatch(_setUserEntryTest(res?.data?.user?.entry_test))
                     createCookie("token", res?.data?.token, 1440)
+                    notifySuccess(res?.message)
                 } else {
-                    notifyError(res.message)
+                    notifyError(res?.message)
                 }
             })
-            await getAllCoursesWithoutPagination().then(response => {
-                dispatch(_setDefaultCourses(response.data.results))
-            }).catch(error => console.error("getAllCoursesWithoutPagination: ", error))
             push('/dashboard')
         } catch (err) {
             console.log("ValidateLogin Error: ", err)

@@ -52,7 +52,7 @@ export const loginUser = async (email: string, password: string) => {
 }
 
 export const updateUserEntryTest = async (data: boolean, id: number) => {
-    return await Client.put(`http://localhost:8000/api/user/${id}`, {entryTest: data})
+    return await Client.put(`http://localhost:8000/api/user/${id}`, {entry_test: data})
         .then(
             (response: AxiosResponse) => {
                 return response.data

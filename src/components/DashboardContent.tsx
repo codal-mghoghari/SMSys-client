@@ -9,6 +9,7 @@ import "@/app/dashboard/page.css"
 import {AllCourses} from "@/components/courses/AllCourses";
 import {useSelector} from "react-redux";
 import {rootStateType} from "../../redux/store/mainStore";
+import {coursesType} from "../../redux/store/slices/courseReducer";
 
 export const DashboardContent = (props: {
     userData: RegisteredUserData,
@@ -19,6 +20,7 @@ export const DashboardContent = (props: {
     //States
     const [toggleBtn, setToggleBtn] = useState("account")
     const recommCourses = useSelector((state: rootStateType) => state.quiz.quizData.recommCourses);
+    const defaultCourses: coursesType = useSelector((state: rootStateType) => state.course)
 
     //Variables
     let newPassword = document.getElementById("new-password") as HTMLInputElement
@@ -34,15 +36,15 @@ export const DashboardContent = (props: {
     }
 
     const optedCourses = props?.userData?.optedCourses
-    const optedUserCourses = optedCourses?.map((data) => data.course)
+    const optedUserCourses = optedCourses?.course
 
     return (
         <>
             {props.active === "user" && (
                 <>
-                    <AllCourses title="Recommended Courses" allQuizData={quizJsonData} quizCats={recommCourses}
+                    <AllCourses title="Recommended Courses" allQuizData={quizJsonData} recommCourses={recommCourses}
                                 btnHandler={props.clickHandler}/>
-                    <AllCourses title="All Courses" allQuizData={quizJsonData} quizCats={quizCats}
+                    <AllCourses title="All Courses" allQuizData={quizJsonData} courses={defaultCourses}
                                 btnHandler={props.clickHandler}
                     />
                 </>

@@ -9,7 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const inter = Inter({subsets: ["latin"]});
 
 
-import type { Viewport } from 'next'
+import type {Viewport} from 'next'
 
 export const viewport: Viewport = {
     width: 'device-width',
@@ -45,8 +45,8 @@ export default function RootLayout({
         <html lang="en">
         <body className={inter.className}>
         <ReduxProvider>
-                <ToastContainer/>
-                {children}
+            <ToastContainer/>
+            {children}
         </ReduxProvider>
         </body>
         </html>

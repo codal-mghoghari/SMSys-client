@@ -1,24 +1,23 @@
-import quizData from '../configuration/quiz.json'
 import defaultConfig from '../configuration/defaultConfig.json'
 import {paginate, StringIndexable} from "@/util/Util";
-import React, {ChangeEvent, useState} from "react";
+import React, {ChangeEvent, useEffect, useState} from "react";
 import Image from "next/image";
 import {useDispatch, useSelector} from "react-redux";
 import {
     _resetQuizQuestions,
     _updateQuizData,
     _setUnAnsweredQuestions,
-    _removeUnAnsweredQuestions, _resetUnAnsweredQuestions, _setRecommCourses
+    _removeUnAnsweredQuestions, _resetUnAnsweredQuestions
 } from "../../redux/store/slices/quizReducer";
 import {rootStateType} from "../../redux/store/mainStore";
 import {getCookie, notifyError, notifySuccess} from "@/util/Common";
 import SubmitDialog from "@/components/SubmitDialog";
-import {updateUserEntryTest} from "@/controller/userController";
-import {_setUserEntryTest} from "../../redux/store/slices/userReducer";
 import {jwtUserData} from "@/interfaces/iRegisterUser";
 import {jwtDecode} from "jwt-decode";
 import {useRouter} from "next/navigation";
 import genRecommendedCourses from "@/util/genRecommendedCourses";
+import {coursesType} from "../../redux/store/slices/courseReducer";
+import {AnswersType, EachAnswersType, iQuizData, QuizDataType} from "@/interfaces/iQuizData";
 
 type RootQuestions = {
     categories: Array<string>,
@@ -30,11 +29,8 @@ type Questions = {
 }
 
 export type CategoryQuestions = {
-    id: number,
-    type: string,
-    question: string,
-    answerOptions: ({ id: number, answer: string, isCorrect?: undefined | boolean })[]
-}[][]
+    question: (string | undefined)[] | undefined
+}[]
 
 export type eachQuestion = {
     id: number,
@@ -44,7 +40,13 @@ export type eachQuestion = {
 }
 
 
-export const QuizUi = () => {
+export const QuizUi = (props: {
+    quizData: QuizDataType
+    setQuizData: any
+}) => {
+    //Redux
+    const courseDataSelector: coursesType = useSelector((state: rootStateType) => state.course);
+
     //Global
     const answeredSelector: StringIndexable = useSelector((state: rootStateType) => state.quiz.quizData.answeredQuestions);
     const unAnsweredSelector: StringIndexable = useSelector((state: rootStateType) => state.quiz.quizData.unAnsweredQuestions);
@@ -58,23 +60,30 @@ export const QuizUi = () => {
 
 
     //Variables
+    const quizData = props.quizData
     const {push} = useRouter();
     const {userData}: jwtUserData = getCookie('token') ? jwtDecode(getCookie('token')!) : {};
     const dispatch = useDispatch();
-    const quizCategories = quizData.map((quiz) => {
-        return quiz.questions[0]
+
+    const quizCategories = props.quizData?.map((quiz) => {
+        return quiz.question_type
     })
-    const Questions: CategoryQuestions = quizCategories.map((quiz) => {
-        return quiz.questions
+    const Questions: (string | undefined)[] | undefined = props?.quizData?.map((quiz) => {
+        return quiz?.question
     })
-    const ansOptions = (qIndex: number) => Questions.map((quiz) => {
-        return quiz[qIndex].answerOptions
+
+    const ansOptions = (questionType: string | undefined) => props.quizData?.map((quiz) => {
+        return quiz.Answers?.filter((answer) => {
+            if(quiz.id === answer.question_id && questionType && questionType === quiz.question_type){
+                return quiz.Answers
+            }
+            return null
+        })
     })
 
     const answeredQuestionsLen = Object.keys(answeredSelector).length
     const unAnsweredQuestionsLen = Object.keys(unAnsweredSelector).length
-    const totalQuestionsLen = Questions[0].length
-
+    const totalQuestionsLen = Questions.length
 
     const handlePrevious = () => {
         const options = (document.getElementsByName('option') as NodeListOf<HTMLInputElement>)
@@ -90,7 +99,7 @@ export const QuizUi = () => {
                 [`q${pageNumber}`]: pageNumber
             }))
         }
-        if (Questions[0].length >= pageNumber && pageNumber > 1) {
+        if (Questions.length >= pageNumber && pageNumber > 1) {
             setPageNumber(prevState => prevState - 1)
         }
 
@@ -110,7 +119,7 @@ export const QuizUi = () => {
                 [`q${pageNumber}`]: pageNumber
             }))
         }
-        if (Questions[0].length !== pageNumber) {
+        if (Questions.length !== pageNumber) {
             setPageNumber(prevState => prevState + 1)
         }
     }
@@ -133,7 +142,7 @@ export const QuizUi = () => {
 
     const handleSelect = (e: ChangeEvent<HTMLInputElement>) => {
         const selectedOpt = e.target.value
-        const selectedOptName = e.target.id
+        const selectedOptName = e.target.name
         dispatch(_updateQuizData({
             ...answeredSelector,
             [selectedOptName]: selectedOpt
@@ -166,21 +175,24 @@ export const QuizUi = () => {
 
     const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        await updateUserEntryTest(true, userData?.id!).then(res => {
-            if (res.data) {
-                let returnedCourses = genRecommendedCourses({answeredSelector, unAnsweredSelector, Questions})
-                if (returnedCourses) {
-                    dispatch(_setRecommCourses(returnedCourses))
-                }
-                dispatch(_setUserEntryTest(true))
-                notifySuccess(res.message)
-                push('/dashboard')
-            } else {
-                notifyError(res.message)
-            }
-        }).catch((err) => {
-            console.error("Quiz Form Submit:", err)
-        })
+        let defCourses = courseDataSelector?.courses?.defaultCourses
+        let returnedCourses = genRecommendedCourses({answeredSelector, unAnsweredSelector, quizData})
+
+        // await updateUserEntryTest(true, userData?.id!).then(res => {
+        //     if (res.data) {
+        //         let returnedCourses = genRecommendedCourses({answeredSelector, unAnsweredSelector, Questions})
+        //         if (returnedCourses) {
+        //             dispatch(_setRecommCourses(returnedCourses))
+        //         }
+        //         dispatch(_setUserEntryTest(true))
+        //         notifySuccess(res.message)
+        //         push('/dashboard')
+        //     } else {
+        //         notifyError(res.message)
+        //     }
+        // }).catch((err) => {
+        //     console.error("Quiz Form Submit:", err)
+        // })
     }
 
 
@@ -188,14 +200,14 @@ export const QuizUi = () => {
         <>
             <div className="flex flex-row items-center justify-end  text-center w-full flex-wrap">
                 <div className="flex gap-2 w-32 flex-wrap">
-                    {Questions[0].map((question, index: React.Key) => (
+                    {Questions.map((question, index: number) => (
                         <div onClick={() => {
-                            setPageNumber(question.id)
+                            setPageNumber(index)
                             handleDirectNavFromButtons()
                         }}
                              key={index}
-                             className={`${unAnsweredSelector[`q${question.id}`] === question.id ? 'bg-rose-200' : 'bg-gray-100'} w-6 h-6 hover:cursor-pointer transition duration-300 ease-in hover:border hover:border-black`}>
-                            {question.id}
+                             className={`${unAnsweredSelector[`q${index+1}`] === index+1 ? 'bg-rose-200' : 'bg-gray-100'} w-6 h-6 hover:cursor-pointer transition duration-300 ease-in hover:border hover:border-black`}>
+                            {index+1}
                         </div>
                     ))}
                 </div>
@@ -216,44 +228,40 @@ export const QuizUi = () => {
                 }
                 <div className="flex flex-col mb-4">
                     {
-                        paginate(Questions[0], pageSize, pageNumber).map((question: eachQuestion, index: React.Key) => {
+                        paginate(props.quizData, pageSize, pageNumber).map((question: iQuizData, index: number) => {
                             return (
                                 <div key={index}>
                                     <div className="flex flex-row items-center justify-center">
                                         <h3 className="text-2xl font-bold mb-6 text-center">
-                                            Question {question.id}
+                                            Question {pageNumber}
                                         </h3>
                                     </div>
                                     {
 
                                         <Image className="absolute left-5 top-5" width="50"
                                                height="50"
-                                               src={`/${question.type}.png`} alt="js"/>
+                                               src={`/${question.question_type}.png`} alt="js"/>
 
                                     }
                                     <label className="text-lg text-gray-800 mb-2">
                                         {question.question}
                                     </label>
-                                    {ansOptions(pageNumber - 1)[0].map((
-                                        option: {
-                                            id: number,
-                                            answer: string,
-                                            isCorrect?: undefined | boolean
-                                        }, index: React.Key) => {
+                                    {ansOptions(question?.question_type)[pageNumber-1]?.map((
+                                        option: any, ansIndex: number) => {
                                         return (
-                                            <div key={index}
+                                            <div key={ansIndex}
                                                  className="flex items-center space-x-4">
-                                                <input id={question.id.toString()}
-                                                       name="option" type="radio"
-                                                       value={option.answer}
+                                                <input id={question.id?.toString()}
+                                                       name={option?.id?.toString()} type="radio"
+                                                       value={option?.option}
                                                        checked={
-                                                           answeredSelector[question.id] === option.answer
+                                                           answeredSelector[`${option.id}`] === option?.option
                                                        }
                                                        onChange={e => handleSelect(e)}
                                                        className="w-4 h-4 text-blue-600 bg-custom-primary border-gray-800 focus:outline-0"
                                                 />
                                                 <label className="text-black">
-                                                    {option.answer}
+                                                    {option?.option}
                                                 </label>
                                             </div>
                                         )

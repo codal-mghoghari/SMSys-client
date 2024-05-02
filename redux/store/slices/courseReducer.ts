@@ -2,20 +2,22 @@ import {createSlice} from "@reduxjs/toolkit"
 
 export type coursesType = {
     courses: {
-        defaultCourses: [
+        defaultCourses?: [
             {
                 id?: string,
                 course?: string,
                 createdAt?: string,
                 updatedAt?: string,
             }
-        ]
+        ],
+        recommCourses: []
     }
 }
 
 const initialState: coursesType = {
     courses: {
-        defaultCourses: [{}]
+        defaultCourses: [{}],
+        recommCourses: []
     },
 }
 
@@ -26,6 +28,9 @@ export const courseSlice = createSlice({
         _setDefaultCourses: (state, action) => {
             state.courses.defaultCourses = action.payload
         },
+        _setRecommCourses: (state, action) => {
+            state.courses.recommCourses = action.payload
+        },
     }
 })
 
@@ -34,4 +39,5 @@ export default courseSlice.reducer
 
 export const {
     _setDefaultCourses,
+    _setRecommCourses
 } = courseSlice.actions

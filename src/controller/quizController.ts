@@ -1,4 +1,4 @@
-import axios, {AxiosError, AxiosHeaders, AxiosResponse} from "axios";
+import axios, {AxiosResponse} from "axios";
 import {getCookie} from "@/util/Common";
 
 axios.defaults.headers.common.Authorization = `Bearer ${getCookie("token")}`
@@ -11,32 +11,9 @@ const Client = axios.create({
 })
 
 
-export const registerUser = async (first_name: string, last_name: string, email: string, password: string) => {
-    return await Client.post('http://localhost:8000/api/signup', {
-        first_name: first_name,
-        last_name: last_name,
-        email: email,
-        password: password
-    })
-        .then(
-            (response: AxiosResponse) => {
-                return response.data
-            }
-        )
-        .catch((error) => {
-            if (error.response.status) {
-                return error.response.data
-            } else {
-                return error
-            }
-        })
-}
-
-export const loginUser = async (email: string, password: string) => {
-    return await Client.post('http://localhost:8000/api/login', {
-        email: email,
-        password: password
-    })
+export const getAllPaginatedQuestions = async (size: number = -1) => {
+    let url = size !== -1 ? `quiz?size=${size}` : `quiz`
+    return await Client.get(`http://localhost:8000/api/${url}`)
         .then(
             (response: AxiosResponse) => {
                 return response?.data
@@ -51,11 +28,27 @@ export const loginUser = async (email: string, password: string) => {
         })
 }
 
-export const updateUserEntryTest = async (data: boolean, id: number) => {
-    return await Client.put(`http://localhost:8000/api/user/${id}`, {entry_test: data})
+export const getQuestionOptions = async (id: number) => {
+    return await Client.get(`http://localhost:8000/api/quiz/${id}`)
         .then(
             (response: AxiosResponse) => {
-                return response.data
+                return response?.data
+            }
+        )
+        .catch((error) => {
+            if (error.response.status) {
+                return error.response.data
+            } else {
+                return error
+            }
+        })
+}
+
+export const checkOptionIsCorrect = async (id: string | undefined) => {
+    return await Client.get(`http://localhost:8000/api/quiz/${id}?isCorrect=1`)
+        .then(
+            (response: AxiosResponse) => {
+                return response?.data
             }
         )
         .catch((error) => {

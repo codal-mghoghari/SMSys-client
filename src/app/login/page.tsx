@@ -4,7 +4,6 @@ import {Formik, FormikValues} from "formik";
 import {LoginSchema, LoginType} from "@/schema/LoginSchema";
 import {RegisterSchema, RegisterType} from "@/schema/RegisterSchema";
 import {loginUser, registerUser} from "@/controller/userController";
-import {getAllCoursesWithoutPagination, getAllOptedCourses, getUserOptedCourses} from "@/controller/courseController";
 import Image from "next/image";
 import {useRouter} from 'next/navigation';
 import {notifySuccess, notifyError, createCookie, getCookie} from "@/util/Common";

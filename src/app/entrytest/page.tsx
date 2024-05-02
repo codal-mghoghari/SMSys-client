@@ -3,11 +3,12 @@ import {useRouter} from 'next/navigation';
 import {getCookie} from "@/util/Common";
 import {useEffect, useState} from "react";
 import {QuizUi} from "@/components/QuizUi";
-import quizData from "../../configuration/quiz.json"
 import {useDispatch, useSelector} from "react-redux";
 import {_setStarted} from "../../../redux/store/slices/quizReducer";
 import {StringIndexable} from "@/util/Util";
 import {rootStateType} from "../../../redux/store/mainStore";
+import {getAllPaginatedQuestions} from "@/controller/quizController";
+import {iQuizData, QuizDataType} from "@/interfaces/iQuizData";
 
 export default function Home() {
     //Global
@@ -19,11 +20,22 @@ export default function Home() {
     const {push} = useRouter();
     const isLoggedIn = !!(getCookie('token')!)
 
+    //States
+    const [quizData, setQuizData] = useState<QuizDataType>([])
+
     useEffect(() => {
-        if(entryTest){
+        if (entryTest) {
             push('/dashboard')
         }
+        try {
+            getAllPaginatedQuestions(80).then((res) => {
+                setQuizData(res?.data?.results)
+            })
+        } catch (err) {
+            console.log("Error while fetching Quiz Data", err)
+        }
     }, []);
+
 
     return (
         <>
@@ -33,7 +45,9 @@ export default function Home() {
                         <div className="w-11/12 rounded-lg shadow-lg mt-14">
                             <div className="relative mx-auto bg-white p-8 border border-solid drop-shadow">
                                 {
-                                    quizSelector.isStarted ? (<QuizUi/>) : (
+                                    quizSelector.isStarted ? (
+                                        <QuizUi quizData={quizData} setQuizData={setQuizData}/>
+                                    ) : (
                                         <div className="flex flex-col items-center justify-center gap-6">
                                             <h1 className="text-center text-black text-[50px] font-bold tracking-[0.5px]">
                                                 Welcome to Quiz!

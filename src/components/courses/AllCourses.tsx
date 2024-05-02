@@ -33,7 +33,7 @@ export const AllCourses = (props: {
                     <div id="recomm-course-container"
                          className="w-full m-4 flex flex-wrap items-start justify-start rounded-tl gap-4 overflow-y-scroll">
                         {
-                            Object.keys(props?.recommCourses!).filter((itm) => props?.recommCourses![itm] > 0).map((cat, index) => {
+                            props?.recommCourses && Object.keys(props?.recommCourses!).filter((itm) => props?.recommCourses![itm] > 0).map((cat, index) => {
                                 return (
                                     <div key={index}
                                          className="relative group flex justify-center items-center 2xl:w-auto lg:w-96 2xl:h-60 lg:h-56 rounded-lg flex-shrink-0 flex-grow bg-courseImage bg-cover opacity-80 cursor-pointer">
@@ -58,7 +58,7 @@ export const AllCourses = (props: {
                     <div id="all-course-container"
                          className="w-full m-4 flex flex-wrap items-start justify-start rounded-tl gap-4 overflow-y-scroll">
                         {
-                            props?.courses?.courses?.defaultCourses.map((cat: {
+                            props?.courses?.courses?.defaultCourses && props?.courses?.courses?.defaultCourses.map((cat: {
                                 id?: string,
                                 course?: string,
                             }, index: number) => {

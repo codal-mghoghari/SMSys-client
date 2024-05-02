@@ -97,7 +97,7 @@ export default function Page() {
     }
 
     const getDefaultCourseUUIDByName = (name: string) => {
-        return courseDataSelector.courses.defaultCourses.find(course => {
+        return courseDataSelector?.courses?.defaultCourses?.find(course => {
             return course.course === name && course.id
         })
     }
@@ -180,7 +180,6 @@ export default function Page() {
         if (!entryTest) { // If user is logged-in but has not given the entry test yet, shall be redirected to EntryTest page.
             push('/entrytest')
         }
-
         if (typeof window !== undefined) {
             let recommCoursesInputElements = (document.getElementById('recomm-course-container') as HTMLElement)?.getElementsByTagName('input')
             let allCoursesInputElements = (document.getElementById('all-course-container') as HTMLElement)?.getElementsByTagName('input')

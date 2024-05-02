@@ -7,7 +7,6 @@ const initialState = {
         isStarted: false,
         answeredQuestions: {},
         unAnsweredQuestions: {},
-        recommCourses: {}
     }
 }
 
@@ -36,9 +35,6 @@ export const quizSlice = createSlice({
         _resetUnAnsweredQuestions: (state) => {
             state.quizData.unAnsweredQuestions = {}
         },
-        _setRecommCourses: (state, action) => {
-            state.quizData.recommCourses = action.payload
-        }
     }
 })
 
@@ -53,5 +49,4 @@ export const {
     _setUnAnsweredQuestions,
     _removeUnAnsweredQuestions,
     _resetUnAnsweredQuestions,
-    _setRecommCourses
 } = quizSlice.actions

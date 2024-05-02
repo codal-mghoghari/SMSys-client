@@ -1,13 +1,13 @@
-import axios, {AxiosError, AxiosResponse} from "axios";
+import axios, {AxiosHeaders, AxiosResponse} from "axios";
 import {getCookie} from "@/util/Common";
 
+
+axios.defaults.headers.common.Authorization = `Bearer ${getCookie("token")}`
+axios.defaults.headers.common.Accept = "application/json"
+axios.defaults.headers.common["Content-Type"] = "application/json"
+axios.defaults.headers.common["Access-Control-Allow-Origin"] = "*"
+
 const Client = axios.create({
-    headers: {
-        "Accept": "application/json",
-        "Access-Control-Allow-Origin": "http://localhost:8000/",
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + getCookie('token')
-    },
     withCredentials: true,
 })
 
@@ -77,6 +77,38 @@ export const addUserCourse = async (data: { courseId?: string }, id: number) => 
 
 export const deleteUserCourse = async (id?: string) => {
     return await Client.delete(`http://localhost:8000/api/optcourse/${id}`)
+        .then(
+            (response: AxiosResponse) => {
+                return response.data
+            }
+        )
+        .catch((error) => {
+            if (error.response.status) {
+                return error.response.statusText
+            } else {
+                return error
+            }
+        })
+}
+
+export const addUserRecommCourse = async (data: { courseId?: string }, id: number) => {
+    return await Client.post(`http://localhost:8000/api/recomm/${id}`, JSON.stringify(data))
+        .then(
+            (response: AxiosResponse) => {
+                return response.data
+            }
+        )
+        .catch((error) => {
+            if (error.response.status) {
+                return error.response.statusText
+            } else {
+                return error
+            }
+        })
+}
+
+export const deleteUserRecommCourse = async (id?: string) => {
+    return await Client.delete(`http://localhost:8000/api/recomm/${id}`)
         .then(
             (response: AxiosResponse) => {
                 return response.data

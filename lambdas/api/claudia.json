@@ -1,0 +1,12 @@
+{
+  "lambda": {
+    "role": "lambda-executor",
+    "name": "api",
+    "region": "ap-south-1",
+    "sharedRole": true
+  },
+  "api": {
+    "id": "z49f09807g",
+    "module": "index"
+  }
+}

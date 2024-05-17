@@ -1,0 +1,28 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "claudia-create": "claudia create --region ap-south-1 --runtime nodejs20.x --set-env-from-json dev.json --role lambda-executor --name api --api-module index --no-optional-dependencies",
+    "claudia-update": "claudia update --runtime nodejs20.x --set-env-from-json dev.json --no-optional-dependencies",
+    "local-claudia": "claudia-local-api --api-module index.js --port 4001"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "claudia": "^5.14.1",
+    "claudia-local-api": "^3.0.4"
+  },
+  "optionalDependencies": {
+    "@aws-sdk/client-dynamodb": "^3.577.0",
+    "@aws-sdk/client-lambda": "^3.577.0",
+    "@aws-sdk/lib-dynamodb": "^3.577.0"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "claudia-api-builder": "^4.1.2",
+    "dotenv": "^16.4.5",
+    "jsonwebtoken": "^9.0.2"
+  }
+}

@@ -68,7 +68,6 @@ export default function Page() {
         const checked = (e.target as HTMLInputElement).checked;
         let id = e.target.id.split('-')[1] ? e.target.id.split('-')[1] : e.target.id
         if (checked) {
-            console.log("asda", [...optedCourses?.course])
             let tempArr = [...optedCourses?.course]
             tempArr?.push(id)
             setOpted(tempArr)
@@ -205,7 +204,6 @@ export default function Page() {
 
 
             const saveOptedCourses = (document.getElementById('saveOptedCourses') as HTMLElement)
-            console.log('prevOptedCourses, current', prevOptedCourses, optedCourses)
             if (JSON.stringify(prevOptedCourses) !== JSON.stringify(optedCourses)) {
                 saveOptedCourses?.classList.remove('invisible')
             } else {

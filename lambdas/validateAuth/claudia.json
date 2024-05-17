@@ -1,0 +1,8 @@
+{
+  "lambda": {
+    "role": "lambda-executor",
+    "name": "validateAuth",
+    "region": "ap-south-1",
+    "sharedRole": true
+  }
+}

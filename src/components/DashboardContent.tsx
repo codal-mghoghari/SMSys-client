@@ -19,8 +19,7 @@ export const DashboardContent = (props: {
 }) => {
     //States
     const [toggleBtn, setToggleBtn] = useState("account")
-    const recommCourses = useSelector((state: rootStateType) => state.quiz.quizData.recommCourses);
-    const defaultCourses: coursesType = useSelector((state: rootStateType) => state.course)
+    const coursesSelector: coursesType = useSelector((state: rootStateType) => state.course)
 
     //Variables
     let newPassword = document.getElementById("new-password") as HTMLInputElement
@@ -42,9 +41,9 @@ export const DashboardContent = (props: {
         <>
             {props.active === "user" && (
                 <>
-                    <AllCourses title="Recommended Courses" allQuizData={quizJsonData} recommCourses={recommCourses}
+                    <AllCourses title="Recommended Courses" allQuizData={quizJsonData} courses={coursesSelector}
                                 btnHandler={props.clickHandler}/>
-                    <AllCourses title="All Courses" allQuizData={quizJsonData} courses={defaultCourses}
+                    <AllCourses title="All Courses" allQuizData={quizJsonData} courses={coursesSelector}
                                 btnHandler={props.clickHandler}
                     />
                 </>

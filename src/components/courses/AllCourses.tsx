@@ -8,7 +8,6 @@ export const AllCourses = (props: {
     title: string,
     allQuizData: Object,
     courses?: coursesType | StringIndexable,
-    recommCourses?: StringIndexable,
     btnHandler: (e: ChangeEvent<HTMLInputElement>) => void
 }) => {
     //States
@@ -18,7 +17,6 @@ export const AllCourses = (props: {
         setHideAllCourses(!hideAllCourses);
     }
 
-    console.log("props?.courses?.courses?.defaultCourses", props?.courses?.courses)
     return (
         <>
             <div className="flex flex-row items-center gap-3 m-4">
@@ -33,7 +31,8 @@ export const AllCourses = (props: {
                     <div id="recomm-course-container"
                          className="w-full m-4 flex flex-wrap items-start justify-start rounded-tl gap-4 overflow-y-scroll">
                         {
-                            props?.recommCourses && Object.keys(props?.recommCourses!).filter((itm) => props?.recommCourses![itm] > 0).map((cat, index) => {
+                            props?.courses?.courses?.recommCourses?.map((cat: string, index: number) => {
+                                console.log("POOP")
                                 return (
                                     <div key={index}
                                          className="relative group flex justify-center items-center 2xl:w-auto lg:w-96 2xl:h-60 lg:h-56 rounded-lg flex-shrink-0 flex-grow bg-courseImage bg-cover opacity-80 cursor-pointer">
@@ -58,7 +57,7 @@ export const AllCourses = (props: {
                     <div id="all-course-container"
                          className="w-full m-4 flex flex-wrap items-start justify-start rounded-tl gap-4 overflow-y-scroll">
                         {
-                            props?.courses?.courses?.defaultCourses && props?.courses?.courses?.defaultCourses.map((cat: {
+                            props?.courses?.courses?.defaultCourses.length > 0 && props?.courses?.courses?.defaultCourses.map((cat: {
                                 id?: string,
                                 course?: string,
                             }, index: number) => {

@@ -1,4 +1,5 @@
 import {Slide, toast} from "react-toastify";
+import {QuizDataType} from "@/interfaces/iQuizData";
 
 export function createCookie(username: string, value: string, minutes: number) {
     let expires, date;
@@ -12,19 +13,6 @@ export function createCookie(username: string, value: string, minutes: number) {
     document.cookie = username + "=" + value + expires + "; path=/";
 }
 
-// export function getCooki(name: string) {
-//     if (typeof window !== "undefined") {
-//         const value = `; ${document?.cookie}`;
-//         const parts = value?.split(`; ${name}=`);
-//         if (parts?.length === 2) {
-//             return parts?.pop()?.split(';')?.shift();
-//         }
-//         return null
-//     } else {
-//         return ""
-//     }
-// }
-
 export const getCookie = (name: string) => typeof window !== "undefined" ? document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`))?.at(2) : null;
 
 export function capitalizeEachWord(str: string) {
@@ -35,6 +23,11 @@ export function capitalizeEachWord(str: string) {
     return splitStr?.join(' ');
 }
 
+export const getQuestionsByType = (allData: QuizDataType, argsQuestionType: string) => {
+    return allData.filter((data) => {
+        return data.question_type === argsQuestionType
+    })
+}
 
 
 export const notifySuccess = (args: string) => toast.success(args, {

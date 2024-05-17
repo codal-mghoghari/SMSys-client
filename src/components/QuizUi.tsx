@@ -16,8 +16,10 @@ import {jwtUserData} from "@/interfaces/iRegisterUser";
 import {jwtDecode} from "jwt-decode";
 import {useRouter} from "next/navigation";
 import genRecommendedCourses from "@/util/genRecommendedCourses";
-import {coursesType} from "../../redux/store/slices/courseReducer";
+import {_setRecommCourses, coursesType} from "../../redux/store/slices/courseReducer";
 import {AnswersType, EachAnswersType, iQuizData, QuizDataType} from "@/interfaces/iQuizData";
+import {updateUserEntryTest} from "@/controller/userController";
+import {_setUserEntryTest} from "../../redux/store/slices/userReducer";
 
 type RootQuestions = {
     categories: Array<string>,
@@ -57,7 +59,7 @@ export const QuizUi = (props: {
     const [pageNumber, setPageNumber] = useState<number>(1);
     const [unAnsweredPlaceholderText, setUnAnsweredPlaceholderText] = useState<string>("");
     const [dialogBool, setDialogBool] = useState({bool: false, elem: ""})
-
+    const [recommCourses, setRecommCourses] = useState<string[]>([])
 
     //Variables
     const quizData = props.quizData
@@ -142,7 +144,7 @@ export const QuizUi = (props: {
 
     const handleSelect = (e: ChangeEvent<HTMLInputElement>) => {
         const selectedOpt = e.target.value
-        const selectedOptName = e.target.name
+        const selectedOptName = e.target.id
         dispatch(_updateQuizData({
             ...answeredSelector,
             [selectedOptName]: selectedOpt
@@ -176,23 +178,27 @@ export const QuizUi = (props: {
     const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         let defCourses = courseDataSelector?.courses?.defaultCourses
-        let returnedCourses = genRecommendedCourses({answeredSelector, unAnsweredSelector, quizData})
 
-        // await updateUserEntryTest(true, userData?.id!).then(res => {
-        //     if (res.data) {
-        //         let returnedCourses = genRecommendedCourses({answeredSelector, unAnsweredSelector, Questions})
-        //         if (returnedCourses) {
-        //             dispatch(_setRecommCourses(returnedCourses))
-        //         }
-        //         dispatch(_setUserEntryTest(true))
-        //         notifySuccess(res.message)
-        //         push('/dashboard')
-        //     } else {
-        //         notifyError(res.message)
-        //     }
-        // }).catch((err) => {
-        //     console.error("Quiz Form Submit:", err)
-        // })
+        await updateUserEntryTest(true, userData?.id!).then(async res => {
+            if (res.data) {
+                await genRecommendedCourses({answeredSelector, unAnsweredSelector, quizData})
+                    .then((result) => {
+                        console.log(result)
+                        setRecommCourses(result)
+                        if (result.length > 0) {
+                            dispatch(_setRecommCourses(result))
+                        }
+                    })
+                    .catch((err) => console.log(err))
+                dispatch(_setUserEntryTest(true))
+                notifySuccess(res.message)
+                push('/dashboard')
+            } else {
+                notifyError(res.message)
+            }
+        }).catch((err) => {
+            console.error("Quiz Form Submit:", err)
+        })
     }
 
 
@@ -252,10 +258,10 @@ export const QuizUi = (props: {
                                             <div key={ansIndex}
                                                  className="flex items-center space-x-4">
                                                 <input id={question.id?.toString()}
-                                                       name={option?.id?.toString()} type="radio"
-                                                       value={option?.option}
+                                                       name="radioBtn" type="radio"
+                                                       value={option?.option.toString()}
                                                        checked={
-                                                           answeredSelector[`${option.id}`] === option?.option
+                                                           answeredSelector[`${question?.id}`] === option?.option.toString()
                                                        }
                                                        onChange={e => handleSelect(e)}
                                                        className="w-4 h-4 text-blue-600 bg-custom-primary border-gray-800 focus:outline-0"

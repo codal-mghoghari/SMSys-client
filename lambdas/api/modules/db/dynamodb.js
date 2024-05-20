@@ -23,7 +23,8 @@ const getRecordsByKey = async (
     limit = 10,
     key,
     value,
-    returnAttr
+    returnAttr,
+    scanIndexForward = true,
 ) => {
     console.log(
         'getAllDataEventRecords >>>>>',
@@ -43,21 +44,20 @@ const getRecordsByKey = async (
 
         let params = {
             TableName: tableName,
-            FilterExpression: `${key} = :value AND is_deleted = :deletedValue`,
+            FilterExpression: `${key} = :value`,
             ExpressionAttributeValues: {
                 ':value': value,
-                ':deletedValue': 0,
             },
             ProjectionExpression: returnAttr,
             Limit: limit,
-            ScanIndexForward: true,
+            ScanIndexForward: scanIndexForward,
         }
 
         if (tableIndex) {
             params['IndexName'] = tableIndex
         }
 
-        console.log('~ file: data-event.js ~ params', params)
+        console.log('>>> DyanamoDB: params:', params)
         const scanCommand = new ScanCommand(params)
         const response = await ddbDocClient.send(scanCommand)
 

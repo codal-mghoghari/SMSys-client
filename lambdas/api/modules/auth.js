@@ -5,29 +5,45 @@ const jwt = require("jsonwebtoken");
 const loginUser = async (request) => {
     try {
         console.log(">>> Login User - request.body: ", request?.body)
-        const tableData = await getRecordsByKey('Users', null, 1, 'email', request?.body?.email, "id, email, password, createdAt, updatedAt, entryTest")
-        if (tableData.data.length !== 0) {
-            const data = Object.assign({}, ...tableData.data)
-            if (request.body?.password === data.password) {
-                delete data.password
-                const token = jwt.sign(
-                    {data},
-                    process.env.SECRETKEY,
-                    {expiresIn: "1d"} // 1 day it will expire
-                );
-                await insertData('UserAuth', {
-                    userId: data.id,
-                    token: token
-                }, true, true)
-                return sendCustomHttpResponse(
-                    {
-                        status: 200,
-                        message: "Logged-in successfully!",
-                        data: token
-                    },
-                    {},
-                    200
-                )
+        const usersTableData = await getRecordsByKey('Users', null, 1, 'email', request?.body?.email, "id, email, password, createdAt, updatedAt, entryTest, user_role")
+        const userData = Object.assign({}, ...usersTableData.data)
+        if (usersTableData.data.length !== 0) {
+            const userAuthTableData = await getRecordsByKey('UserAuth', null, 1, 'userId', userData.id, "userId, user_token, expiresAt", false)
+            const userAuthData = Object.assign({}, ...userAuthTableData.data)
+            if (request.body?.password === userData.password) {
+                let isExpired = userAuthTableData.data.length !== 0 ? (Date.now() >= userAuthData.data?.expiresAt) : true
+                if (isExpired && userAuthTableData.data.length === 0) {
+                    delete userData.password
+                    const token = jwt.sign(
+                        {userData},
+                        process.env.SECRETKEY,
+                        {expiresIn: "1d"} // 1 day it will expire
+                    );
+                    await insertData('UserAuth', {
+                        userId: userData.id,
+                        user_token: token
+                    }, true, true)
+                    return sendCustomHttpResponse(
+                        {
+                            status: 200,
+                            message: "Logged-in successfully!",
+                            data: token
+                        },
+                        {},
+                        200
+                    )
+                } else {
+                    return sendCustomHttpResponse(
+                        {
+                            status: 200,
+                            message: "Logged-in successfully!",
+                            data: userAuthData?.user_token
+                        },
+                        {},
+                        200
+                    )
+                }
+
             }
             return sendCustomHttpResponse(
                 {
@@ -57,13 +73,7 @@ const registerUser = async (request) => {
     try {
         const validatedUserData = validateRegisterJoi(request)
         console.log(">>> Register User - validatedUserData: ", validatedUserData)
-        const tableData = await getRecordsByKey('Users', null, 1, 'email', validatedUserData?.email, "id, email, password, createdAt, updatedAt, entry_test")
-        const saveUserData = await insertData('Users', {
-            ...validatedUserData,
-            entryTest: 0,
-            role: 1,
-            is_deleted: 0,
-        }, false, true)
+        const tableData = await getRecordsByKey('Users', null, 1, 'email', validatedUserData?.email, "id, email, password, createdAt, updatedAt, entryTest")
         if (tableData.data.length !== 0) {
             return sendCustomHttpResponse(
                 {
@@ -74,10 +84,15 @@ const registerUser = async (request) => {
                 400
             )
         }
+        await insertData('Users', {
+            ...validatedUserData,
+            entryTest: 0,
+            user_role: 1,
+        }, false, true)
         return sendCustomHttpResponse(
             {
                 status: 200,
-                message: "Registered user!",
+                message: "User Registered successfully!",
             },
             {},
             200

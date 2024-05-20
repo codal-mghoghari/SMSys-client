@@ -2,7 +2,13 @@ const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 
 const sendCustomHttpResponse = (body, headers, code, multiValueHeaders = null) => {
-    return new global.apiBuilder.ApiResponse(body, headers, code, multiValueHeaders)
+    let minimalHeaders = {
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
+        ...headers
+    }
+    return new global.apiBuilder.ApiResponse(body, minimalHeaders, code, multiValueHeaders)
 }
 
 const notFoundDefault = async () => {
@@ -101,9 +107,9 @@ async function jwtValidation(token) {
 
 
 const parseRequest = async (request) => {
-    const { proxyRequest = {}, body = {} } = request
-    const { requestContext = {} } = proxyRequest
-    let { authorizer = {} } = requestContext
+    const {proxyRequest = {}, body = {}} = request
+    const {requestContext = {}} = proxyRequest
+    let {authorizer = {}} = requestContext
 
     const localENV = process.env.NODE_ENV === 'dev'
     if (localENV) {
@@ -118,7 +124,7 @@ const parseRequest = async (request) => {
     }
     return {
         authorizer,
-        data: { ...body, ...request.queryString, ...body.data },
+        data: {...body, ...request.queryString, ...body.data},
     }
 }
 
@@ -132,7 +138,7 @@ const validateRegisterJoi = (request) => {
             .required(),
         email: Joi
             .string()
-            .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
+            .email({minDomainSegments: 2, tlds: {allow: ['com', 'net']}})
             .required(),
         password: Joi
             .string()
@@ -140,7 +146,7 @@ const validateRegisterJoi = (request) => {
             .required()
     })
     const {error, value} = joiSchema.validate(request?.body)
-    if(error){
+    if (error) {
         const validationErrorMessages = error.details.map((err, i) => {
             let regex = new RegExp(err.context.label)
             let pathOfVariable = err.path.join('.')

@@ -35,7 +35,10 @@ const getRecordsByKey = async (
     )
     try {
         if (!tableName) {
-            return new Error('Table name is not added.')
+            return new Error('Table name is not added!')
+        }
+        if(key === null || value === null){
+            return new Error("Key or Value is undefined/null!")
         }
 
         let params = {
@@ -80,9 +83,8 @@ const getRecordsByKey = async (
     }
 }
 
-const insertData = async (tableName, data, isAuth = false) => {
+const insertData = async (tableName, data, isAuth = false, createColsForEach = true) => {
     console.log('InsertData >>> ', tableName, '>>', data)
-
 
     if (!tableName) {
         throw new Error('Table name is required.')
@@ -92,12 +94,21 @@ const insertData = async (tableName, data, isAuth = false) => {
         const params = {
             TableName: tableName,
             Item: {
-                id : uuidv4(),
-                data,
+                id: uuidv4(),
+                ...data,
                 createdAt: Date.now(),
                 updatedAt: Date.now(),
             },
         }
+        if (createColsForEach === false) {
+            params.Item = {
+                id: uuidv4(),
+                data,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+            }
+        }
+        console.log("InsertData >>> Params: ", params)
         if (isAuth) {
             let date = new Date()
             params.Item['expiresAt'] = date.setDate(date.getDate() + 1);

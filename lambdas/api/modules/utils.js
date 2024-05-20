@@ -1,4 +1,6 @@
 const jwt = require("jsonwebtoken");
+const joi = require('joi')
+const Joi = require("joi");
 
 const sendCustomHttpResponse = (body, headers, code, multiValueHeaders = null) => {
     return new global.apiBuilder.ApiResponse(body, headers, code, multiValueHeaders)
@@ -121,6 +123,38 @@ const parseRequest = async (request) => {
     }
 }
 
+const validateRegisterJoi = (request) => {
+    const joiSchema = Joi.object({
+        email: Joi
+            .string()
+            .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
+            .required(),
+        password: Joi
+            .string()
+            .min(6)
+            .required()
+    })
+    const {error, value} = joiSchema.validate(request?.body)
+    if(error){
+        const validationErrorMessages = error.details.map((err, i) => {
+            let regex = new RegExp(err.context.label)
+            let pathOfVariable = err.path.join('.')
+            err.message = err.message.replace(regex, pathOfVariable)
+            return err.message.replace(/"/g, "'")
+        })
+        return sendCustomHttpResponse(
+            {
+                status: 400,
+                message: "Validation Error",
+                validationErrors: validationErrorMessages
+            },
+            {},
+            400
+        )
+    }
+    return value
+}
+
 module.exports = {
     parseRequest,
     sendCustomHttpResponse,
@@ -131,4 +165,5 @@ module.exports = {
     badRequestErrorDetails,
     notFoundResponse,
     successResponse,
+    validateRegisterJoi,
 }

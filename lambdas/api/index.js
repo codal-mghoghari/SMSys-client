@@ -1,6 +1,6 @@
 const {notFoundDefault} = require("./modules/utils");
 const apiBuilder = require('claudia-api-builder');
-const {loginUser} = require("./modules/login");
+const {loginUser, registerUser} = require("./modules/auth");
 api = new apiBuilder()
 global.apiBuilder = apiBuilder
 
@@ -22,8 +22,8 @@ api.get('/', notFoundDefault)
 api.post('/', notFoundDefault)
 
 
-api.post(PREFIX + '/login', loginUser, {
-    customAuthorizer: 'validateAuth'
-})
+api.post(PREFIX + '/login', loginUser)
+api.post(PREFIX + '/register', registerUser)
+
 
 

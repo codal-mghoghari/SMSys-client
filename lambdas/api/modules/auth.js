@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const loginUser = async (request) => {
     try {
         console.log(">>> Login User - request.body: ", request?.body)
-        const usersTableData = await getRecordsByKey('Users', null, 1, 'email', request?.body?.email, "id, email, password, createdAt, updatedAt, entryTest, user_role")
+        const usersTableData = await getRecordsByKey('Users', null, 1, 'email', request?.body?.email, "id, first_name, last_name, email, password, createdAt, updatedAt, entryTest, user_role")
         const userData = Object.assign({}, ...usersTableData.data)
         if (usersTableData.data.length !== 0) {
             const userAuthTableData = await getRecordsByKey('UserAuth', null, 1, 'userId', userData.id, "userId, user_token, expiresAt", false)
@@ -73,7 +73,7 @@ const registerUser = async (request) => {
     try {
         const validatedUserData = validateRegisterJoi(request)
         console.log(">>> Register User - validatedUserData: ", validatedUserData)
-        const tableData = await getRecordsByKey('Users', null, 1, 'email', validatedUserData?.email, "id, email, password, createdAt, updatedAt, entryTest")
+        const tableData = await getRecordsByKey('Users', null, 1, 'email', validatedUserData?.email, "id, first_name, last_name, email, password, createdAt, updatedAt, entryTest")
         if (tableData.data.length !== 0) {
             return sendCustomHttpResponse(
                 {

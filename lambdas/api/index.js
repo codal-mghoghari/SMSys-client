@@ -24,6 +24,3 @@ api.post('/', notFoundDefault)
 
 api.post(PREFIX + '/login', loginUser)
 api.post(PREFIX + '/register', registerUser)
-
-
-

@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-const joi = require('joi')
 const Joi = require("joi");
 
 const sendCustomHttpResponse = (body, headers, code, multiValueHeaders = null) => {
@@ -125,6 +124,12 @@ const parseRequest = async (request) => {
 
 const validateRegisterJoi = (request) => {
     const joiSchema = Joi.object({
+        first_name: Joi
+            .string()
+            .required(),
+        last_name: Joi
+            .string()
+            .required(),
         email: Joi
             .string()
             .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })

@@ -1,18 +1,21 @@
-const {sendCustomHttpResponse, parseRequest, validateRegisterJoi} = require("./utils");
+const {sendCustomHttpResponse, parseRequest} = require("./utils");
 const {getRecordsByKey, insertData} = require("./db/dynamodb");
 const jwt = require("jsonwebtoken");
+const {validateRegisterJoi} = require("./joi");
 
 const loginUser = async (request) => {
     try {
         console.log(">>> Login User - request.body: ", request?.body)
-        const usersTableData = await getRecordsByKey('Users', null, 1, 'email', request?.body?.email, "id, first_name, last_name, email, password, createdAt, updatedAt, entryTest, user_role")
+        const usersTableData = await getRecordsByKey('Users', null, null, 'email', request?.body?.email, "id, first_name, last_name, email, password, createdAt, updatedAt, entryTest, user_role")
         const userData = Object.assign({}, ...usersTableData.data)
         if (usersTableData.data.length !== 0) {
             const userAuthTableData = await getRecordsByKey('UserAuth', null, 1, 'userId', userData.id, "userId, user_token, expiresAt", false)
             const userAuthData = Object.assign({}, ...userAuthTableData.data)
             if (request.body?.password === userData.password) {
-                let isExpired = userAuthTableData.data.length !== 0 ? (Date.now() >= userAuthData.data?.expiresAt) : true
-                if (isExpired && userAuthTableData.data.length === 0) {
+                let date = new Date()
+                const oneDay = date.setDate(date.getDate() + 1)
+                let isExpired = userAuthTableData.data.length !== 0 ? (oneDay <= Date.parse(userAuthData?.expiresAt)) : true
+                if (isExpired) {
                     delete userData.password
                     const token = jwt.sign(
                         {userData},
@@ -64,7 +67,15 @@ const loginUser = async (request) => {
         )
 
     } catch (error) {
-        console.error(error)
+        console.error(">>> LoginUser Error:", error)
+        return sendCustomHttpResponse(
+            {
+                status: 500,
+                message: "Internal Server Error, please contact administrator!",
+            },
+            {},
+            500
+        )
     }
 }
 
@@ -99,7 +110,15 @@ const registerUser = async (request) => {
         )
 
     } catch (error) {
-        console.error(error)
+        console.error(">>> RegisterUser Error:", error)
+        return sendCustomHttpResponse(
+            {
+                status: 500,
+                message: "Internal Server Error, please contact administrator!",
+            },
+            {},
+            500
+        )
     }
 }
 

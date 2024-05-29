@@ -1,6 +1,9 @@
 const {notFoundDefault} = require("./modules/utils");
 const apiBuilder = require('claudia-api-builder');
+
 const {loginUser, registerUser} = require("./modules/auth");
+const {Courses} = require("./modules/course");
+
 api = new apiBuilder()
 global.apiBuilder = apiBuilder
 
@@ -21,6 +24,10 @@ const PREFIX = '/api'
 api.get('/', notFoundDefault)
 api.post('/', notFoundDefault)
 
-
+// Auth Routes
 api.post(PREFIX + '/login', loginUser)
 api.post(PREFIX + '/register', registerUser)
+
+// Courses Routes
+api.get(PREFIX + '/courses', Courses)
+api.post(PREFIX + '/courses', Courses)

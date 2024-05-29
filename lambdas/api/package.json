@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "claudia-create": "claudia create --region ap-south-1 --runtime nodejs20.x --set-env-from-json dev.json --role lambda-executor --name api --api-module index --no-optional-dependencies",
-    "claudia-update": "claudia update --runtime nodejs20.x --set-env-from-json dev.json --no-optional-dependencies",
+    "claudia-update": "claudia update --runtime nodejs20.x --update-env-from-json dev.json --no-optional-dependencies",
     "local-claudia": "claudia-local-api --api-module index.js --port 4001"
   },
   "author": "",

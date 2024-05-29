@@ -6,7 +6,6 @@ const {
 const dynamoDbClient = new DynamoDBClient({
     region: "ap-south-1"
 })
-
 const ddbDocClient = DynamoDBDocumentClient.from(dynamoDbClient, {
     marshallOptions: {
         removeUndefinedValues: true,
@@ -14,17 +13,17 @@ const ddbDocClient = DynamoDBDocumentClient.from(dynamoDbClient, {
 })
 
 const {
-    seedCoursesData
+    seedQuestionsData,
+    seedOptionsData
 } = require("./data/index");
 const {processWriteRequests, createWriteRequest} = require("./utils");
 
 async function main() {
-    const writeRequests = createWriteRequest(seedCoursesData)
-    const response = await processWriteRequests(
-        ddbDocClient,
-        "tableName",
-        writeRequests
-    );
+    const seededQuestionsData = seedQuestionsData
+    const seedOptData = seedOptionsData(seededQuestionsData)
+    const writeRequests = createWriteRequest(seededQuestionsData)
+    const writeParellelRequests = createWriteRequest(seedOptData.flat(1))
+    const response = await processWriteRequests(ddbDocClient, 'Questions', writeRequests, "Options", writeParellelRequests)
     console.log(">>> Data seeded: ", response)
 }
 

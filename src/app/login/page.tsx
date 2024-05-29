@@ -64,6 +64,7 @@ export default function Page() {
             const {email, password} = values
             await loginUser(email, password).then(async (res) => {
                 if (res?.data) {
+                    console.log("DATA:", res?.data)
                     dispatch(_setUser(res?.data?.user))
                     dispatch(_setUserEntryTest(res?.data?.user?.entry_test))
                     createCookie("token", res?.data?.token, 1440)

@@ -1,4 +1,4 @@
 {
   "SECRETKEY": "margav",
-  "NODE_ENV": "dev"
+  "NODE_ENV": "prod"
 }

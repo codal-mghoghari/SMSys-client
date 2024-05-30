@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "claudia-create": "claudia create --region ap-south-1 --runtime nodejs20.x --set-env-from-json dev.json --role lambda-executor --name validateAuth --handler index.handler",
+    "claudia-create": "claudia create --region ap-south-1 --runtime nodejs20.x --set-env-from-json dev.json --role lambda-executor --name validateAuth --handler index.handler --no-optional-dependencies",
     "test": "claudia test-lambda",
-    "claudia-update": "claudia update --runtime nodejs20.x --set-env-from-json dev.json"
+    "claudia-update": "claudia update --runtime nodejs20.x --set-env-from-json dev.json --no-optional-dependencies"
   },
   "author": "",
   "license": "ISC",
@@ -15,6 +15,7 @@
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
+    "claudia": "^5.14.1",
     "claudia-local-api": "^3.0.4"
   }
 }

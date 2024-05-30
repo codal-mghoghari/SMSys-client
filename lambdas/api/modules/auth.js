@@ -1,4 +1,4 @@
-const {sendCustomHttpResponse, parseRequest} = require("./utils");
+const {sendCustomHttpResponse, checkTokenExpired} = require("./utils");
 const {getRecordsByKey, insertData} = require("./db/dynamodb");
 const jwt = require("jsonwebtoken");
 const {validateRegisterJoi} = require("./joi");
@@ -12,9 +12,7 @@ const loginUser = async (request) => {
             const userAuthTableData = await getRecordsByKey('UserAuth', null, 1, 'userId', userData.id, "userId, user_token, expiresAt", false)
             const userAuthData = Object.assign({}, ...userAuthTableData.data)
             if (request.body?.password === userData.password) {
-                let date = new Date()
-                const oneDay = date.setDate(date.getDate() + 1)
-                let isExpired = userAuthTableData.data.length !== 0 ? (oneDay <= Date.parse(userAuthData?.expiresAt)) : true
+                let isExpired = userAuthTableData.data.length !== 0 ? checkTokenExpired(userAuthData?.user_token) : true
                 if (isExpired) {
                     delete userData.password
                     const token = jwt.sign(

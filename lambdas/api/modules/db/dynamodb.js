@@ -33,9 +33,13 @@ const getAllRecords = async (
         let params = {
             TableName: tableName,
             ProjectionExpression: returnAttr,
-            Limit: limit || 10,
             ScanIndexForward: scanIndexForward,
         }
+
+        if (limit) {
+            params['Limit'] = limit
+        }
+
         if (tableIndex) {
             params['IndexName'] = tableIndex
         }
@@ -46,7 +50,8 @@ const getAllRecords = async (
 
         if (response.Count > 0) {
             const result = {
-                data: response.Items
+                data: response.Items,
+                totalLength: response.Items.length,
             }
             console.log(
                 'getAllRecords >>>>>',
@@ -125,6 +130,7 @@ const getRecordsByKey = async (
         if (response.Count > 0) {
             const result = {
                 data: response.Items,
+                totalLength: response.Items.length,
             }
             console.log(
                 'getRecordsByKey >>>>>',

@@ -27,7 +27,8 @@ async function processWriteRequests(
         const requestItems = {};
         requestItems[tableName] = writeRequests.slice(i, i + DDB_BATCH_SIZE);
         if (parallelWriteRequests && parallelWRTableName) {
-            requestItems[parallelWRTableName] = parallelWriteRequests.slice(i, i + 4);
+            const k = i * 4
+            requestItems[parallelWRTableName] = parallelWriteRequests.slice(k, k + 4);
         }
         const command = new BatchWriteItemCommand({
             RequestItems: requestItems
@@ -48,7 +49,6 @@ async function processWriteRequests(
 
     return {
         status: "Completed",
-        results: results,
         unprocessedItems: unprocessedItems,
     }
 }

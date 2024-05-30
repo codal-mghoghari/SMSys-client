@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const Joi = require("joi");
+const {getRecordsByKey} = require("./db/dynamodb");
 
 const sendCustomHttpResponse = (body, headers, code, multiValueHeaders = null) => {
     let minimalHeaders = {
@@ -119,17 +119,40 @@ const parseRequest = async (request) => {
                 authorizer = await jwtValidation(token)
             }
         } catch (error) {
-            console.error('>>>>>: error', error)
+            console.error('>>>>>: Auth Error', error)
         }
     }
+    console.log(">>>> Authorizer: ", {
+        authorizer,
+    })
     return {
         authorizer,
         data: {...body, ...request.queryString, ...body.data},
     }
 }
 
+const checkUserExists = async (data) => {
+    if (data === (null | undefined) || data?.length === 0) return false
+    const tableData = await getRecordsByKey('Users', null, 1, 'email', data?.email, "id, first_name, last_name, email, password, createdAt, updatedAt, entryTest")
+    return tableData?.data.length === 0;
+}
+
+const checkTokenExpired = (token) => {
+    if (token === (null | undefined) || token?.length === 0) return false
+    try {
+        const tokenDecoded = jwt.verify(token, process.env.SECRETKEY);
+        return (Date.now() >= tokenDecoded?.exp * 1000);
+    } catch (err) {
+        if (err instanceof jwt.TokenExpiredError) return true
+        console.error(">>> checkTokenExpired error:", err)
+        return err
+    }
+}
+
 module.exports = {
     parseRequest,
+    checkUserExists,
+    checkTokenExpired,
     sendCustomHttpResponse,
     notFoundDefault,
     badRequest,

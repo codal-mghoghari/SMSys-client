@@ -1,24 +1,24 @@
-const {getCourses} = require("./getCourses");
-const {addCourses} = require("./addCourses");
 const {sendCustomHttpResponse} = require("../utils");
+const {getOptions} = require("./getOptions");
+const {getOptionByQID} = require("./getOptionByQID");
 
-const Courses = async (request) => {
+const Options = async (request) => {
     switch (request?.context?.method) {
         case "GET":
-            let getCoursesData = await getCourses(request)
-            if (getCoursesData.data && getCoursesData.data.length !== 0) {
+            let getOptData = await getOptions(request)
+            if (getOptData.data && getOptData.data.length !== 0) {
                 return sendCustomHttpResponse(
                     {
                         status: 200,
-                        message: "All courses listed!",
-                        data: getCoursesData.data,
-                        totalLength: getCoursesData.totalLength
+                        message: "All Options listed!",
+                        data: getOptData.data,
+                        totalLength: getOptData.totalLength
                     },
                     {},
                     200
                 )
             }
-            if (getCoursesData.data && getCoursesData.data.length === 0) {
+            if (getOptData.data && getOptData.data.length === 0) {
                 return sendCustomHttpResponse(
                     {
                         status: 404,
@@ -33,29 +33,41 @@ const Courses = async (request) => {
                 {
                     status: 500,
                     message: "Internal Server Error, please contact administrator!",
-                    data: getCoursesData || null,
+                    data: getOptData || null,
                 },
                 {},
                 500
             )
         case "POST":
-            let addCoursesData = await addCourses(request)
-            if (addCoursesData.status) {
+            let getOptByQIDData = await getOptionByQID(request)
+            if (getOptByQIDData.data && getOptByQIDData.data.length !== 0) {
                 return sendCustomHttpResponse(
                     {
-                        status: addCoursesData.status,
-                        message: addCoursesData.message,
-                        data: addCoursesData.data
+                        status: 200,
+                        message: "Record found!",
+                        data: getOptByQIDData.data,
+                        totalLength: getOptByQIDData.totalLength
                     },
                     {},
-                    addCoursesData.status
+                    200
+                )
+            }
+            if (getOptByQIDData.data && getOptByQIDData.data.length === 0) {
+                return sendCustomHttpResponse(
+                    {
+                        status: 404,
+                        message: "No records found!",
+                        data: null,
+                    },
+                    {},
+                    404
                 )
             }
             return sendCustomHttpResponse(
                 {
                     status: 500,
                     message: "Internal Server Error, please contact administrator!",
-                    data: addCoursesData || null,
+                    data: getOptByQIDData || null,
                 },
                 {},
                 500
@@ -66,5 +78,5 @@ const Courses = async (request) => {
 }
 
 module.exports = {
-    Courses
+    Options
 }

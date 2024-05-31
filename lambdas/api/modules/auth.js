@@ -6,22 +6,20 @@ const {validateRegisterJoi} = require("./joi");
 const loginUser = async (request) => {
     try {
         console.log(">>> Login User - request.body: ", request?.body)
-        const usersTableData = await getRecordsByKey('Users', null, null, 'email', request?.body?.email, "id, first_name, last_name, email, password, createdAt, updatedAt, entryTest, user_role")
-        const userData = Object.assign({}, ...usersTableData.data)
-        if (usersTableData.data.length !== 0) {
-            const userAuthTableData = await getRecordsByKey('UserAuth', null, 1, 'userId', userData.id, "userId, user_token, expiresAt", false)
-            const userAuthData = Object.assign({}, ...userAuthTableData.data)
-            if (request.body?.password === userData.password) {
-                let isExpired = userAuthTableData.data.length !== 0 ? checkTokenExpired(userAuthData?.user_token) : true
+        const userData = await getRecordsByKey('Users', null, null, 'email', request?.body?.email, "id, first_name, last_name, email, password, createdAt, updatedAt, entryTest, user_role")
+        if (userData?.totalLength !== 0) {
+            const userAuthData = await getRecordsByKey('UserAuth', null, 1, 'userId', userData?.data?.id, "userId, user_token, expiresAt", false)
+            if (request.body?.password === userData?.data?.password) {
+                let isExpired = userAuthData.totalLength !== 0 ? checkTokenExpired(userAuthData?.data?.user_token) : true
                 if (isExpired) {
-                    delete userData.password
+                    delete userData?.data?.password
                     const token = jwt.sign(
-                        {userData},
+                        {...userData?.data},
                         process.env.SECRETKEY,
                         {expiresIn: "1d"} // 1 day it will expire
                     );
                     await insertData('UserAuth', {
-                        userId: userData.id,
+                        userId: userData?.data?.id,
                         user_token: token
                     }, true, true)
                     return sendCustomHttpResponse(

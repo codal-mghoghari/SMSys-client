@@ -6,6 +6,7 @@ const {Courses} = require("./modules/course");
 const {Questions} = require("./modules/question");
 const {Options} = require("./modules/option");
 const {OptedCourses} = require("./modules/optedcourse");
+const {Users} = require("./modules/user");
 
 api = new apiBuilder()
 global.apiBuilder = apiBuilder
@@ -23,9 +24,19 @@ api.registerAuthorizer('validateAuth', {
 const PREFIX = '/api'
 
 // Default Routes
-
 api.get('/', notFoundDefault)
 api.post('/', notFoundDefault)
+
+// Users Routes
+api.get(PREFIX + '/users', Users, { // For fetching all users
+    customAuthorizer: "validateAuth"
+})
+api.get(PREFIX + '/users/{id}', Users, { // For fetching User by id
+    customAuthorizer: "validateAuth"
+})
+api.post(PREFIX + '/users/{id}', Users, { // For updating User
+    customAuthorizer: "validateAuth"
+})
 
 // Auth Routes
 api.post(PREFIX + '/login', loginUser)
@@ -33,7 +44,7 @@ api.post(PREFIX + '/register', registerUser)
 
 // Courses Routes
 api.get(PREFIX + '/courses', Courses)
-api.post(PREFIX + '/courses', Courses, {
+api.get(PREFIX + '/courses', Courses, {
     customAuthorizer: "validateAuth"
 })
 
@@ -41,7 +52,7 @@ api.post(PREFIX + '/courses', Courses, {
 api.get(PREFIX + '/optedcourses', OptedCourses, {
     customAuthorizer: "validateAuth"
 })
-api.post(PREFIX + '/optedcourses/{id}', OptedCourses, {
+api.get(PREFIX + '/optedcourses/{id}', OptedCourses, {
     customAuthorizer: "validateAuth"
 })
 
@@ -49,7 +60,7 @@ api.post(PREFIX + '/optedcourses/{id}', OptedCourses, {
 api.get(PREFIX + '/questions', Questions, {
     customAuthorizer: "validateAuth"
 })
-api.post(PREFIX + '/questions/{id}', Questions, {
+api.get(PREFIX + '/questions/{id}', Questions, {
     customAuthorizer: "validateAuth"
 })
 
@@ -57,6 +68,6 @@ api.post(PREFIX + '/questions/{id}', Questions, {
 api.get(PREFIX + '/options', Options, {
     customAuthorizer: "validateAuth"
 })
-api.post(PREFIX + '/options/{id}', Options, {
+api.get(PREFIX + '/options/{id}', Options, {
     customAuthorizer: "validateAuth"
 })

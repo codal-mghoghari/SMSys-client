@@ -1,6 +1,6 @@
 const {parseRequest, checkUserExists} = require("../utils");
 const {getAllRecords} = require("../db/dynamodb");
-const getOptedCourses = async (request) => {
+const getRecommCourses = async (request) => {
     try {
         const {authorizer} = parseRequest(request)
         const validToken = await checkUserExists(authorizer)
@@ -8,13 +8,13 @@ const getOptedCourses = async (request) => {
             return []
         }
         const {limit, include} = request.queryString
-        return await getAllRecords('OptedCourses', null, limit ? parseInt(limit) : null, include ? include : null)
+        return await getAllRecords('RecommCourses', null, limit ? parseInt(limit) : null, include ? include : null)
     } catch (error) {
-        console.error(">>> Get OptedCourses Error:", error)
+        console.error(">>> Get RecommCourses Error:", error)
         return []
     }
 }
 
 module.exports = {
-    getOptedCourses
+    getRecommCourses
 }

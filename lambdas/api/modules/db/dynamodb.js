@@ -21,11 +21,12 @@ const getAllRecords = async (
     tableIndex = null,
     limit = null,
     returnAttr,
-    scanIndexForward = true
+    scanIndexForward = true,
+    deleteCreds = false,
 ) => {
-    console.log('getAllRecords >>>>>', tableName)
-
     try {
+        console.log('getAllRecords >>>>>', tableName)
+
         if (!tableName) {
             return new Error('Table name is not added.')
         }
@@ -49,9 +50,18 @@ const getAllRecords = async (
         const response = await ddbDocClient.send(queryCommand)
 
         if (response.Count > 0) {
-            const result = {
+            let result = {
                 data: response.Items,
                 totalLength: response.Items.length,
+            }
+            if (deleteCreds) {
+                let newResult = Object.assign({}, ...result.data)
+                delete newResult?.password
+                result.data = [newResult]
+            }
+            if (result.data.length === 1) {
+                // If data length is equal to 1, convert from Array<Object> to <Object>
+                result.data = Object.assign({}, ...result.data)
             }
             console.log(
                 'getAllRecords >>>>>',
@@ -80,6 +90,7 @@ const getRecordsByKey = async (
     returnAttr = null,
     scanIndexForward = true,
     caseInSensitive = false,
+    deleteCreds = false,
 ) => {
     console.log(
         'getRecordsByKey >>>>>',
@@ -93,7 +104,7 @@ const getRecordsByKey = async (
         if (!tableName) {
             return new Error('Table name is not added!')
         }
-        if (key === null || value === null) {
+        if (key === (null | undefined) || value === (null | undefined)) {
             return new Error("Key or Value is undefined/null!")
         }
 
@@ -132,6 +143,15 @@ const getRecordsByKey = async (
                 data: response.Items,
                 totalLength: response.Items.length,
             }
+            if (deleteCreds) {
+                let newResult = Object.assign({}, ...result.data)
+                delete newResult?.password
+                result.data = [newResult]
+            }
+            if (result.data.length === 1) {
+                // If data length is equal to 1, convert from Array<Object> to <Object>
+                result.data = Object.assign({}, ...result.data)
+            }
             console.log(
                 'getRecordsByKey >>>>>',
                 tableName,
@@ -156,14 +176,18 @@ const getRecordsByKey = async (
     }
 }
 
-const insertData = async (tableName, data, isAuth = false, createColsForEach = true, caseInSensitve = false) => {
-    console.log('InsertData >>> ', tableName, '>>', data)
-
-    if (!tableName) {
-        throw new Error('Table name is required.')
-    }
-
+const insertData = async (
+    tableName,
+    data,
+    isAuth = false,
+    createColsForEach = true,
+) => {
     try {
+        console.log('InsertData >>> ', tableName, '>>', data)
+        if (!tableName) {
+            return new Error('Table name is required.')
+        }
+
         const params = {
             TableName: tableName,
             Item: {
@@ -197,8 +221,64 @@ const insertData = async (tableName, data, isAuth = false, createColsForEach = t
     }
 }
 
+const updateData = async (
+    tableName,
+    searchKey,
+    searchValue,
+    updateKey,
+    updateValue,
+) => {
+    try {
+        console.log(
+            'updateData >>>>>',
+            tableName,
+            '>>',
+            'search key & Value >>',
+            searchKey,
+            searchValue,
+            '>>',
+            'update key & value >>',
+            updateKey,
+            updateValue,
+        )
+        if (!tableName) {
+            return new Error('Table name is required.')
+        }
+
+        if (searchKey === (null | undefined) || searchValue === (null | undefined)) {
+            return new Error("Row's Key or Value is undefined/null!")
+        }
+
+        if (updateKey === (null | undefined) || updateValue === (null | undefined)) {
+            return new Error("Updating Data's Key or Value is undefined/null!")
+        }
+
+        let params = {
+            TableName: tableName,
+            Key: {
+                [searchKey]: searchValue.toString(),
+            },
+            UpdateExpression:
+                `set ${updateKey} = :value, updatedAt = :updatedAt`,
+            ExpressionAttributeValues: {
+                ':value': updateValue,
+                ':updatedAt': new Date().toISOString(),
+            },
+            ReturnValues: "ALL_NEW",
+        }
+        console.log(">>> Update Data ~ params: ", params)
+        const updateCommand = new UpdateCommand(params)
+        const updateResult = await ddbDocClient.send(updateCommand)
+        console.log('>>>> update Data -> result', JSON.stringify(updateResult, null, 4))
+        return updateResult
+    } catch (err) {
+        throw new Error(err.message)
+    }
+}
+
 module.exports = {
     getAllRecords,
     getRecordsByKey,
     insertData,
+    updateData
 }

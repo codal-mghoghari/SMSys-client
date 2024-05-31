@@ -8,8 +8,8 @@ const getQuestions = async (request) => {
         if (!validToken) {
             return []
         }
-        const {limit} = request.queryString
-        return await getAllRecords('Questions', null, limit ? parseInt(limit) : null, "id, question, question_type, createdAt, updatedAt")
+        const {limit, include} = request.queryString
+        return await getAllRecords('Questions', null, limit ? parseInt(limit) : null, include ? include : null)
     } catch (error) {
         console.error(">>> GetQuestions Error:", error)
         return []

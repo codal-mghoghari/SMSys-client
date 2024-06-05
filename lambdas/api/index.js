@@ -7,6 +7,7 @@ const {Questions} = require("./modules/question");
 const {Options} = require("./modules/option");
 const {OptedCourses} = require("./modules/optedcourse");
 const {Users} = require("./modules/user");
+const {RecommCourses} = require("./modules/recommcourse");
 
 api = new apiBuilder()
 global.apiBuilder = apiBuilder
@@ -44,11 +45,20 @@ api.post(PREFIX + '/register', registerUser)
 
 // Courses Routes
 api.get(PREFIX + '/courses', Courses)
-api.get(PREFIX + '/courses', Courses, {
+api.get(PREFIX + `/courses/{id}`, Courses)
+api.post(PREFIX + '/courses', Courses, {
     customAuthorizer: "validateAuth"
 })
 
-//Opted Courses Routes
+// Recommended Courses Routes
+api.get(PREFIX + '/recommcourses', RecommCourses, {
+    customAuthorizer: "validateAuth"
+})
+api.get(PREFIX + '/recommcourses/{id}', RecommCourses, {
+    customAuthorizer: "validateAuth"
+})
+
+// Opted Courses Routes
 api.get(PREFIX + '/optedcourses', OptedCourses, {
     customAuthorizer: "validateAuth"
 })

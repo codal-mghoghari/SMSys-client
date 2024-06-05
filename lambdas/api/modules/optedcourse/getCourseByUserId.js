@@ -1,10 +1,9 @@
 const {getRecordsByKey} = require("../db/dynamodb");
 const getCourseByUserId = async (request) => {
     try {
-        const {limit} = request?.queryString
+        const {limit, include} = request?.queryString
         const id = request?.pathParams?.id
-        const {returnAttr} = request?.body
-        return await getRecordsByKey('OptedCourses', null, limit ? parseInt(limit) : null, "userId", id, returnAttr ? returnAttr : null)
+        return await getRecordsByKey('OptedCourses', null, limit ? parseInt(limit) : null, "userId", id, include ? include : null)
     } catch (error) {
         console.error(">>> Post OptedCourses Error:", error)
         return []

@@ -63,7 +63,7 @@ const Users = async (request) => {
                 {
                     status: 500,
                     message: "Internal Server Error, please contact administrator!",
-                    data: getUserData || null,
+                    data: null,
                 },
                 {},
                 500
@@ -71,7 +71,7 @@ const Users = async (request) => {
         case "POST":
             // Update user field
             let updatedUserField = await updateUser(request)
-            if (updatedUserField.data && updatedUserField.data.length !== 0) {
+            if (updatedUserField?.data && updatedUserField?.data?.length !== 0) {
                 return sendCustomHttpResponse(
                     {
                         status: 200,
@@ -83,7 +83,7 @@ const Users = async (request) => {
                     200
                 )
             }
-            if (updatedUserField.data && updatedUserField.data.length === 0) {
+            if (updatedUserField?.length === 0 || updatedUserField?.data === null || updatedUserField?.data?.length === 0) {
                 return sendCustomHttpResponse(
                     {
                         status: 404,

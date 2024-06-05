@@ -1,10 +1,9 @@
 const {getRecordsByKey} = require("../db/dynamodb");
 const getQuestionById = async (request) => {
     try {
-        const {limit} = request?.queryString
+        const {limit, include} = request?.queryString
         const id = request?.pathParams?.id
-        const {returnAttr} = request?.body
-        return await getRecordsByKey('Questions', null, limit ? parseInt(limit) : null, "id", id, returnAttr ? returnAttr : null)
+        return await getRecordsByKey('Questions', null, limit ? parseInt(limit) : null, "id", id, include ? include : null)
     } catch (error) {
         console.error(">>> GetQuestionById Error:", error)
         return []

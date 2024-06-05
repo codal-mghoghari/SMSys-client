@@ -141,7 +141,6 @@ const getRecordsByKey = async (
         if (response.Count > 0) {
             const result = {
                 data: response.Items,
-                totalLength: response.Items.length,
             }
             if (deleteCreds) {
                 let newResult = Object.assign({}, ...result.data)
@@ -152,6 +151,7 @@ const getRecordsByKey = async (
                 // If data length is equal to 1, convert from Array<Object> to <Object>
                 result.data = Object.assign({}, ...result.data)
             }
+            Object.keys(result?.data).length > 0 ? result['totalLength'] = Object.keys(result?.data).length : result['totalLength'] = null
             console.log(
                 'getRecordsByKey >>>>>',
                 tableName,
@@ -269,7 +269,15 @@ const updateData = async (
         console.log(">>> Update Data ~ params: ", params)
         const updateCommand = new UpdateCommand(params)
         const updateResult = await ddbDocClient.send(updateCommand)
-        console.log('>>>> update Data -> result', JSON.stringify(updateResult, null, 4))
+        if (updateResult?.Attributes) {
+            delete updateResult?.Attributes?.password
+            let returnData = {
+                data: updateResult?.Attributes,
+            }
+            Object.keys(returnData?.data).length > 0 ? returnData['totalLength'] = Object.keys(returnData?.data).length : returnData['totalLength'] = null
+            return returnData
+        }
+        console.log('>>>> Update Data -> result', JSON.stringify(updateResult, null, 4))
         return updateResult
     } catch (err) {
         throw new Error(err.message)

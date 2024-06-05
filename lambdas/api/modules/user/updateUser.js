@@ -8,15 +8,7 @@ const updateUser = async (request) => {
         if (userData && userData?.totalLength > 0 && requestBody) {
             let requestKey = Object.keys(requestBody)[0]
             let requestValue = Object.values(requestBody)[0]
-            let updatedData = await updateData('Users', 'id', userData?.data?.id, requestKey, requestValue)
-            console.log(">>> UpdatedData: ", updatedData)
-            if (updatedData.Attributes) {
-                return {
-                    data: updatedData.Attributes,
-                    totalLength: updatedData.Attributes.length
-                }
-            }
-            return []
+            return await updateData('Users', 'id', userData?.data?.id, requestKey, requestValue)
         }
         return []
     } catch (error) {

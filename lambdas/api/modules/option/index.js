@@ -1,13 +1,13 @@
 const {sendCustomHttpResponse} = require("../utils");
 const {getOptions} = require("./getOptions");
-const {getOptionByQID} = require("./getOptionByQID");
+const {getOptionById} = require("./getOptionById");
 
 const Options = async (request) => {
     switch (request?.context?.method) {
         case "GET":
             if (request?.pathParams?.id) {
                 // Get option by id
-                let getOptByQIDData = await getOptionByQID(request)
+                let getOptByQIDData = await getOptionById(request)
                 if (getOptByQIDData.data && getOptByQIDData.data.length !== 0) {
                     return sendCustomHttpResponse(
                         {

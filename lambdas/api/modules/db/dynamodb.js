@@ -284,6 +284,32 @@ const updateData = async (
     }
 }
 
+
+const deleteData = async (tableName, rowId, userId) => {
+    try {
+        console.debug('deleteData >>>>>', tableName, '>>', rowId, ">>> userId: ", userId)
+
+        if (!tableName) {
+            return new Error('Table name is not added.')
+        }
+
+        const params = {
+            TableName: tableName,
+            Key: {
+                id: rowId,
+                userId: userId,
+            },
+        }
+        const deleteItemCommand = new DeleteCommand(params)
+
+        const result = await ddbDocClient.send(deleteItemCommand)
+        console.debug('deleteData ~ Result >>>>>', result)
+        return result
+    } catch (error) {
+        throw error
+    }
+}
+
 module.exports = {
     getAllRecords,
     getRecordsByKey,

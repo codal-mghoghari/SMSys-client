@@ -4,7 +4,7 @@ const addCourses = async (request) => {
     try {
         const validatedUserData = validateAddCourseJoi(request)
         const courseTableData = await getRecordsByKey('Courses', null,  null, 'course_name', validatedUserData?.course_name, "id, course_name, createdAt, updatedAt", true, true)
-        if (courseTableData.data.length !== 0) {
+        if (!Array.isArray(courseTableData?.data) && courseTableData.totalLength !== 0) {
             return {
                 status: 400,
                 message: "There is already a course with same name!",

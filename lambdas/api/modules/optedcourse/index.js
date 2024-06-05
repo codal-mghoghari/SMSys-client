@@ -1,6 +1,7 @@
 const {sendCustomHttpResponse} = require("../utils");
 const {getOptedCourses} = require("./getOptedCourses");
 const {getCourseByUserId} = require("./getCourseByUserId");
+const {addOptedCourses} = require("./addOptedCourses");
 
 const OptedCourses = async (request) => {
     switch (request?.context?.method) {
@@ -59,6 +60,31 @@ const OptedCourses = async (request) => {
                 }
             }
 
+            return sendCustomHttpResponse(
+                {
+                    status: 500,
+                    message: "Internal Server Error, please contact administrator!",
+                    data: null,
+                },
+                {},
+                500
+            )
+        case "POST":
+            if (request?.pathParams?.id) {
+                // Fetch Opted Courses by id
+                let addOptedCoursesData = await addOptedCourses(request)
+                if (addOptedCoursesData?.status) {
+                    return sendCustomHttpResponse(
+                        {
+                            status: addOptedCoursesData.status,
+                            message: addOptedCoursesData.message,
+                            data: addOptedCoursesData.data
+                        },
+                        {},
+                        addOptedCoursesData.status
+                    )
+                }
+            }
             return sendCustomHttpResponse(
                 {
                     status: 500,

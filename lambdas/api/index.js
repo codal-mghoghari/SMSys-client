@@ -27,6 +27,8 @@ const PREFIX = '/api'
 // Default Routes
 api.get('/', notFoundDefault)
 api.post('/', notFoundDefault)
+api.get(PREFIX, notFoundDefault)
+api.post(PREFIX, notFoundDefault)
 
 // Users Routes
 api.get(PREFIX + '/users', Users, { // For fetching all users
@@ -57,12 +59,18 @@ api.get(PREFIX + '/recommcourses', RecommCourses, {
 api.get(PREFIX + '/recommcourses/{id}', RecommCourses, {
     customAuthorizer: "validateAuth"
 })
+api.post(PREFIX + '/recommcourses/{id}', RecommCourses, {
+    customAuthorizer: "validateAuth"
+})
 
 // Opted Courses Routes
 api.get(PREFIX + '/optedcourses', OptedCourses, {
     customAuthorizer: "validateAuth"
 })
 api.get(PREFIX + '/optedcourses/{id}', OptedCourses, {
+    customAuthorizer: "validateAuth"
+})
+api.post(PREFIX + '/optedcourses/{id}', OptedCourses, {
     customAuthorizer: "validateAuth"
 })
 

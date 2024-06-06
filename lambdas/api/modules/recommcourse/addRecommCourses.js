@@ -5,7 +5,7 @@ const addRecommCourses = async (request) => {
         const userId = request?.pathParams?.id;
         const validatedUserData = validateAddCourseJoi(request)
         const courseTableData = await getRecordsByKey('RecommCourses', null, null, 'userId', userId, "id, course_name, userId, createdAt, updatedAt", true, true)
-        if (!Array.isArray(courseTableData?.data) && courseTableData.totalLength !== 0) {
+        if (!Array.isArray(courseTableData?.data) && courseTableData.data.length !== 0) {
             return {
                 status: 400,
                 message: "There is already a recommended course connected with that userId!",

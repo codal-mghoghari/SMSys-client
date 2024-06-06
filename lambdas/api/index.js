@@ -62,6 +62,9 @@ api.get(PREFIX + '/recommcourses/{id}', RecommCourses, {
 api.post(PREFIX + '/recommcourses/{id}', RecommCourses, {
     customAuthorizer: "validateAuth"
 })
+api.delete(PREFIX + '/recommcourses/{id}', RecommCourses, {
+    customAuthorizer: "validateAuth"
+})
 
 // Opted Courses Routes
 api.get(PREFIX + '/optedcourses', OptedCourses, {
@@ -71,6 +74,9 @@ api.get(PREFIX + '/optedcourses/{id}', OptedCourses, {
     customAuthorizer: "validateAuth"
 })
 api.post(PREFIX + '/optedcourses/{id}', OptedCourses, {
+    customAuthorizer: "validateAuth"
+})
+api.delete(PREFIX + '/optedcourses/{id}', OptedCourses, {
     customAuthorizer: "validateAuth"
 })
 

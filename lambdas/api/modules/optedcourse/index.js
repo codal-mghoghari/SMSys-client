@@ -2,6 +2,7 @@ const {sendCustomHttpResponse} = require("../utils");
 const {getOptedCourses} = require("./getOptedCourses");
 const {getCourseByUserId} = require("./getCourseByUserId");
 const {addOptedCourses} = require("./addOptedCourses");
+const {deleteOptedCourses} = require("./deleteOptedCourses");
 
 const OptedCourses = async (request) => {
     switch (request?.context?.method) {
@@ -82,6 +83,31 @@ const OptedCourses = async (request) => {
                         },
                         {},
                         addOptedCoursesData.status
+                    )
+                }
+            }
+            return sendCustomHttpResponse(
+                {
+                    status: 500,
+                    message: "Internal Server Error, please contact administrator!",
+                    data: null,
+                },
+                {},
+                500
+            )
+        case "DELETE":
+            if (request?.pathParams?.id) {
+                // Delete Opted Courses by id
+                let delOptedCoursesData = await deleteOptedCourses(request)
+                if (delOptedCoursesData?.status) {
+                    return sendCustomHttpResponse(
+                        {
+                            status: delOptedCoursesData.status,
+                            message: delOptedCoursesData.message,
+                            data: delOptedCoursesData.data
+                        },
+                        {},
+                        delOptedCoursesData.status
                     )
                 }
             }

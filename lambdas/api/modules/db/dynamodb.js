@@ -52,7 +52,7 @@ const getAllRecords = async (
         if (response.Count > 0) {
             let result = {
                 data: response.Items,
-                totalLength: response.Items.length,
+                totalLength: response?.Count
             }
             if (deleteCreds) {
                 let newResult = Object.assign({}, ...result.data)
@@ -91,6 +91,8 @@ const getRecordsByKey = async (
     scanIndexForward = true,
     caseInSensitive = false,
     deleteCreds = false,
+    customExpression = null,
+    customExpressionVal = null,
 ) => {
     console.log(
         'getRecordsByKey >>>>>',
@@ -134,13 +136,19 @@ const getRecordsByKey = async (
             }
         }
 
+        if (customExpression && customExpressionVal) {
+            params['FilterExpression'] = customExpression
+            params['ExpressionAttributeValues'] = customExpressionVal
+        }
+
         console.log('>>> DyanamoDB: params:', params)
         const scanCommand = new ScanCommand(params)
         const response = await ddbDocClient.send(scanCommand)
 
         if (response.Count > 0) {
             const result = {
-                data: response.Items,
+                data: response?.Items,
+                totalLength: response?.Count
             }
             if (deleteCreds) {
                 let newResult = Object.assign({}, ...result.data)
@@ -151,7 +159,6 @@ const getRecordsByKey = async (
                 // If data length is equal to 1, convert from Array<Object> to <Object>
                 result.data = Object.assign({}, ...result.data)
             }
-            Object.keys(result?.data).length > 0 ? result['totalLength'] = Object.keys(result?.data).length : result['totalLength'] = null
             console.log(
                 'getRecordsByKey >>>>>',
                 tableName,
@@ -285,19 +292,20 @@ const updateData = async (
 }
 
 
-const deleteData = async (tableName, rowId, userId) => {
+const deleteDataByPartitionKey = async (tableName, primaryDeleteKey, primaryDeleteValue) => {
     try {
-        console.debug('deleteData >>>>>', tableName, '>>', rowId, ">>> userId: ", userId)
+        console.debug('deleteData >>>>>', tableName, 'primaryDeleteKey >>', primaryDeleteKey, ">>> primaryDeleteValue: ", primaryDeleteValue)
 
         if (!tableName) {
             return new Error('Table name is not added.')
         }
 
+        // TODO: Setup Case InSensitive Data
+
         const params = {
             TableName: tableName,
             Key: {
-                id: rowId,
-                userId: userId,
+                [primaryDeleteKey]: primaryDeleteValue.toString(),
             },
         }
         const deleteItemCommand = new DeleteCommand(params)
@@ -314,5 +322,6 @@ module.exports = {
     getAllRecords,
     getRecordsByKey,
     insertData,
-    updateData
+    updateData,
+    deleteDataByPartitionKey
 }

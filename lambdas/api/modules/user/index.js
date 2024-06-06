@@ -39,7 +39,7 @@ const Users = async (request) => {
                     return sendCustomHttpResponse(
                         {
                             status: 200,
-                            message: "All Users  listed!",
+                            message: "All Users listed!",
                             data: getUserData.data,
                             totalLength: getUserData.totalLength
                         },

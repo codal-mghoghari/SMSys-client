@@ -5,8 +5,7 @@ const addOptedCourses = async (request) => {
         const userId = request?.pathParams?.id;
         const validatedUserData = validateAddCourseJoi(request)
         const courseTableData = await getRecordsByKey('OptedCourses', null, null, 'userId', userId, "id, course_name, userId, createdAt, updatedAt", true, true)
-        console.log("courseTableData: ", courseTableData)
-        if (!Array.isArray(courseTableData?.data) && courseTableData.totalLength !== 0) {
+        if (!Array.isArray(courseTableData?.data) && courseTableData.data.length !== 0) {
             return {
                 status: 400,
                 message: "There is already a opted course connected with that userId!",

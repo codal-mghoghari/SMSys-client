@@ -196,7 +196,7 @@ export const DashboardContent = (props: {
                                              className="relative right-0 col-span-8 h-[20rem] overflow-x-hidden overflow-y-auto rounded-xl sm:bg-gray-50 sm:px-8 sm:shadow">
                                             <div
                                                 className="absolute transform rotate-45 bg-gray-600 text-center text-white font-semibold py-1 right-[-40px] top-10 w-[190px]">
-                                                {props.userData.role === 1 ? ("Student") : ("Admin")}
+                                                {props.userData?.user_role === 1 ? ("Student") : ("Admin")}
                                             </div>
                                             <div className="pt-4">
                                                 <h1 className="py-2 text-2xl font-semibold">Profile Settings</h1>
@@ -228,15 +228,15 @@ export const DashboardContent = (props: {
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-col gap-6">
-                                                    <div className="w-44">
-                                                        <label htmlFor="date_of_birth"
-                                                               className="block mb-2 text-sm font-medium text-custom-primary">
-                                                            Date Of Birth</label>
-                                                        <input type="text" id="date_of_birth"
-                                                               className="bg-gray-50 border border-gray-300 text-black text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 "
-                                                               placeholder="DOB"
-                                                               defaultValue={props.userData.date_of_birth!}/>
-                                                    </div>
+                                                    {/*<div className="w-44">*/}
+                                                    {/*    <label htmlFor="date_of_birth"*/}
+                                                    {/*           className="block mb-2 text-sm font-medium text-custom-primary">*/}
+                                                    {/*        Date Of Birth</label>*/}
+                                                    {/*    <input type="text" id="date_of_birth"*/}
+                                                    {/*           className="bg-gray-50 border border-gray-300 text-black text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 "*/}
+                                                    {/*           placeholder="DOB"*/}
+                                                    {/*           defaultValue={props.userData.date_of_birth!}/>*/}
+                                                    {/*</div>*/}
                                                     <div className="w-44">
                                                         <label htmlFor="optedCourses"
                                                                className="block mb-2 text-sm font-medium text-custom-primary">

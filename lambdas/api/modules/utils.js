@@ -3,10 +3,7 @@ const {getRecordsByKey} = require("./db/dynamodb");
 
 const sendCustomHttpResponse = (body, headers, code, multiValueHeaders = null) => {
     let minimalHeaders = {
-        "Access-Control-Allow-Headers": "Content-Type",
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
-        ...headers
     }
     return new global.apiBuilder.ApiResponse(body, minimalHeaders, code, multiValueHeaders)
 }

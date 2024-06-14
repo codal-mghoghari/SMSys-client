@@ -1,15 +1,13 @@
 import {createSlice} from "@reduxjs/toolkit";
 import {RegisteredUserData} from "@/interfaces/iRegisterUser";
 
-type loggedUserData = {
+export type loggedUserData = {
     loggedInUserData: RegisteredUserData,
     entryTest: false
 }
 
 const initialState: loggedUserData = {
-    loggedInUserData: {
-        full_name: ""
-    },
+    loggedInUserData: {},
     entryTest: false
 }
 

@@ -16,11 +16,12 @@ import {
 import {notifySuccess, notifyError} from "@/util/Common";
 import {useDispatch, useSelector} from "react-redux";
 import {rootStateType} from "../../../redux/store/mainStore";
-import {_setUser, _setUserCourses} from "../../../redux/store/slices/userReducer";
+import {_setUser, _setUserCourses, _setUserEntryTest} from "../../../redux/store/slices/userReducer";
 import defaultConfig from "../../configuration/defaultConfig.json"
 import "./page.css"
 import {StringIndexable} from "@/util/Util";
 import {_setDefaultCourses, coursesType} from "../../../redux/store/slices/courseReducer";
+import Image from "next/image";
 
 export default function Page() {
     //Global preload
@@ -40,29 +41,11 @@ export default function Page() {
 
     //Variables
     const {push} = useRouter();
-    const {userData}: jwtUserData = isLoggedIn ? jwtDecode(getCookie('token')!) : {}
+    const userData: jwtUserData = isLoggedIn ? jwtDecode(getCookie('token')!) : {}
     const [prevOptedCourses, setPrevOptedCourses] = useState(optedCourses);
     const saveOptedCourses = typeof window !== "undefined" ? document?.getElementById('saveOptedCourses') as HTMLElement : null // TODO - Fix the Console Error - ReferenceError: location is not defined
     const dispatch = useDispatch();
 
-    //TODO() - Calling API every reload, should not be done. Set it at login time.
-    const getDefaults = async () => {
-        await getUserOptedCourses(userDataSelector?.id!).then(response => {
-            if (response?.data) {
-                let res = response?.data?.map((elm: any) => elm.course)
-                dispatch(_setUserCourses({course: res}))
-            } else {
-                dispatch(_setUserCourses({course: []}))
-            }
-        }).catch(error => console.error("getUserOptedCourses: ", error))
-        await getAllCoursesWithoutPagination().then(response => {
-            dispatch(_setDefaultCourses(response?.data?.results))
-        }).catch(error => console.error("getAllCoursesWithoutPagination: ", error))
-    }
-
-    useEffect(() => {
-        getDefaults()
-    }, []);
 
     const tickHandler = (e: ChangeEvent<HTMLInputElement>) => {
         const checked = (e.target as HTMLInputElement).checked;
@@ -97,68 +80,67 @@ export default function Page() {
 
     const getDefaultCourseUUIDByName = (name: string) => {
         return courseDataSelector?.courses?.defaultCourses?.find(course => {
-            return course.course === name && course.id
+            return course.course_name?.toLowerCase() === name.toLowerCase() && course.id
         })
     }
 
-    const optCourse = () => {
+    const optCourse = async () => {
         try {
             if (opted) {
                 setSaveDisable(true)
                 console.log('Opted')
-                setTimeout(async () => {
-                    for (const opt of opted) {
-                        let courseUUID = getDefaultCourseUUIDByName(opt)
-                        if (courseUUID) {
-                            await addUserCourse({courseId: courseUUID?.id}, (userData?.id as number)).then(res => {
-                                if (res.data) {
-                                    notifySuccess(res.message)
-                                    dispatch(_setUserCourses(optedCourses))
-                                } else {
-                                    notifyError(res.message)
-                                }
-                            })
-                        }
+                for (const opt of opted) {
+                    let optedCourseUUID = getDefaultCourseUUIDByName(opt)
+                    if (optedCourseUUID) {
+                        await addUserCourse(userData?.id, optedCourseUUID?.id).then(res => {
+                            if (res?.data) {
+                                notifySuccess(res?.message)
+                                dispatch(_setUserCourses(optedCourses))
+                                setOpted([])
+                                setPrevOptedCourses(optedCourses)
+                            } else {
+                                notifyError(res?.message)
+                            }
+                        }).finally(() => {
+                            if (!saveOptedCourses?.classList.contains('invisible')) {
+                                saveOptedCourses?.classList.add('invisible')
+                            }
+                            setSaveDisable(false)
+                        })
                     }
-                    if (!saveOptedCourses?.classList.contains('invisible')) {
-                        saveOptedCourses?.classList.add('invisible')
-                    }
-                    setOpted([])
-                    setPrevOptedCourses(optedCourses)
-                    setSaveDisable(false)
-                }, 2000)
+                }
+
             }
         } catch (err) {
             console.error("Opted Course Error: ", err)
         }
     }
 
-    const unOptCourse = () => {
+    const unOptCourse = async () => {
         try {
             if (unOpted) {
                 setSaveDisable(true)
                 console.log("unOpted")
-                setTimeout(async () => {
-                    for (const opt of unOpted) {
-                        let courseUUID = getDefaultCourseUUIDByName(opt)
-                        if (courseUUID) {
-                            await deleteUserCourse(courseUUID?.id).then(res => {
-                                if (res.status === "SUCCESS") {
-                                    notifySuccess(res.message)
-                                    dispatch(_setUserCourses(optedCourses))
-                                } else {
-                                    notifyError(res)
-                                }
-                            })
-                        }
+                for (const opt of unOpted) {
+                    let unOptedCourseUUID = getDefaultCourseUUIDByName(opt)
+                    if (unOptedCourseUUID) {
+                        await deleteUserCourse(unOptedCourseUUID?.id).then(res => {
+                            if (res?.data) {
+                                notifySuccess(res?.message)
+                                dispatch(_setUserCourses(optedCourses))
+                            } else {
+                                notifyError(res?.message)
+                            }
+                        }).finally(() => {
+                            if (!saveOptedCourses?.classList.contains('invisible')) {
+                                saveOptedCourses?.classList.add('invisible')
+                            }
+                            setSaveDisable(false)
+                        })
                     }
-                    if (!saveOptedCourses?.classList.contains('invisible')) {
-                        saveOptedCourses?.classList.add('invisible')
-                    }
-                    setUnOpted([])
-                    setPrevOptedCourses(optedCourses)
-                    setSaveDisable(false)
-                }, 2000)
+                }
+                setUnOpted([])
+                setPrevOptedCourses(optedCourses)
             }
         } catch (err) {
             console.error("Opted Course Error:", err)
@@ -166,12 +148,12 @@ export default function Page() {
     }
 
 
-    const handleSaveOptedCourses = () => {
+    const handleSaveOptedCourses = async () => {
         if (unOpted.length > 0) {
-            unOptCourse()
+            await unOptCourse()
         }
         if (opted.length > 0) {
-            optCourse()
+            await optCourse()
         }
     }
 
@@ -183,24 +165,28 @@ export default function Page() {
             let recommCoursesInputElements = (document.getElementById('recomm-course-container') as HTMLElement)?.getElementsByTagName('input')
             let allCoursesInputElements = (document.getElementById('all-course-container') as HTMLElement)?.getElementsByTagName('input')
 
-            Array.from((recommCoursesInputElements)).map(elem => {
-                let index = optedCourses?.course?.indexOf(elem.id)
-                if (index !== -1) {
-                    elem.checked = optedCourses.course && elem.id === (optedCourses as StringIndexable)?.course[index];
-                } else {
-                    elem.checked = false
-                }
-            })
+            if (recommCoursesInputElements && recommCoursesInputElements.length > 0) {
+                Array.from((recommCoursesInputElements)).map(elem => {
+                    let index = optedCourses?.course?.indexOf(elem.id)
+                    if (index !== -1) {
+                        elem.checked = optedCourses.course && elem.id === (optedCourses as StringIndexable)?.course[index];
+                    } else {
+                        elem.checked = false
+                    }
+                })
+            }
 
-            Array.from((allCoursesInputElements)).map(elem => {
-                let id = elem.id.split('-')[1]
-                let index = optedCourses?.course?.indexOf(id)
-                if (index !== -1) {
-                    elem.checked = optedCourses.course && id === (optedCourses as StringIndexable)?.course[index];
-                } else {
-                    elem.checked = false
-                }
-            })
+            if (allCoursesInputElements && allCoursesInputElements.length > 0) {
+                Array.from((allCoursesInputElements)).map(elem => {
+                    let id = elem.id.split('-')[1]
+                    let index = optedCourses?.course?.indexOf(id)
+                    if (index !== -1) {
+                        elem.checked = optedCourses.course && id === (optedCourses as StringIndexable)?.course[index];
+                    } else {
+                        elem.checked = false
+                    }
+                })
+            }
 
 
             const saveOptedCourses = (document.getElementById('saveOptedCourses') as HTMLElement)
@@ -230,7 +216,7 @@ export default function Page() {
     return (
         <>
             {
-                isLoggedIn ? (
+                isLoggedIn && (
                     <>
                         <div className="h-screen w-full bg-white relative flex overflow-hidden">
                             <Aside active={activeElem} handleUserClick={handleUserClick}
@@ -244,14 +230,14 @@ export default function Page() {
 
                                         <div className="flex flex-col items-end ">
                                             <div
-                                                className="text-md font-medium">{capitalizeEachWord(userDataSelector.full_name)}</div>
+                                                className="text-md font-medium">{capitalizeEachWord(`${userDataSelector.first_name} ${userDataSelector.last_name}`)}</div>
                                             <div
-                                                className="text-sm font-regular">{userDataSelector.role === 0 ? ('Admin') : ('Student')}</div>
+                                                className="text-sm font-regular">{userDataSelector.user_role === 0 ? 'Admin' : 'Student'}</div>
                                         </div>
 
                                         <div
                                             className="h-10 w-10 z-20 rounded-full cursor-pointer bg-gray-200 border-2 border-gray-500">
-                                            <img src="https://dummyjson.com/image/300" alt="pfp"
+                                            <Image src="/avatar.png" height="50" width="50" alt="pfp"
                                                  className="rounded-full z-10"/>
                                         </div>
                                     </div>
@@ -277,8 +263,6 @@ export default function Page() {
                             </div>
                         </div>
                     </>
-                ) : (
-                    push('/login')
                 )
             }
         </>

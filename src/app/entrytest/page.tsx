@@ -7,8 +7,15 @@ import {useDispatch, useSelector} from "react-redux";
 import {_setStarted} from "../../../redux/store/slices/quizReducer";
 import {StringIndexable} from "@/util/Util";
 import {rootStateType} from "../../../redux/store/mainStore";
-import {getAllPaginatedQuestions} from "@/controller/quizController";
-import {iQuizData, QuizDataType} from "@/interfaces/iQuizData";
+import {getAllPaginatedQuestions, getAllOptions} from "@/controller/quizController";
+import {
+    iQuizData,
+    QuizDataType, QuizEachOptionsType,
+    QuizEachQuestionType,
+    QuizOptionsType,
+    QuizQuestionsType
+} from "@/interfaces/iQuizData";
+import Loading from "@/app/loading";
 
 export default function Home() {
     //Global
@@ -18,21 +25,57 @@ export default function Home() {
     //Variables
     const dispatch = useDispatch();
     const {push} = useRouter();
-    const isLoggedIn = !!(getCookie('token')!)
 
     //States
     const [quizData, setQuizData] = useState<QuizDataType>([])
+    const [isLoading, setIsLoading] = useState<boolean>(false)
+
+    const fetchQuestionOptions = async () => {
+        try {
+            const questionsData: QuizQuestionsType = await getAllPaginatedQuestions("id,question,question_type").then((res) => {
+                return res?.data
+            }).catch((err) => {
+                console.log("getAllPaginatedQuestions Error: ", err)
+                throw err;
+            })
+            const answersData: QuizOptionsType = await getAllOptions("id,question_id,question_type,isCorrect,option_description").then((res) => {
+                return res?.data
+            }).catch((err) => {
+                console.log("getAllOptions Error: ", err)
+                throw err;
+            })
+            return {questionsData: questionsData, answersData: answersData}
+        } catch (err) {
+            console.log("Error while fetching Quiz Data", err)
+        }
+    }
 
     useEffect(() => {
         if (entryTest) {
             push('/dashboard')
-        }
-        try {
-            getAllPaginatedQuestions(80).then((res) => {
-                setQuizData(res?.data?.results)
+        } else {
+            setIsLoading(true)
+            fetchQuestionOptions().then((res) => {
+                let finalData: any = []
+                res?.questionsData?.map((question: QuizEachQuestionType) => {
+                    let ansData: any = []
+                    res?.answersData?.map((answer: QuizEachOptionsType) => {
+                        if (answer?.question_id === question?.id) {
+                            ansData.push({
+                                ...answer
+                            })
+                        }
+                    })
+                    if (ansData.length > 0) {
+                        finalData.push({
+                            ...question,
+                            Answers: ansData
+                        })
+                    }
+                })
+                setQuizData(finalData)
+                setIsLoading(false)
             })
-        } catch (err) {
-            console.log("Error while fetching Quiz Data", err)
         }
     }, []);
 
@@ -40,12 +83,14 @@ export default function Home() {
     return (
         <>
             {
-                isLoggedIn ? (
+                isLoading ? (
+                    <Loading/>
+                ) : (
                     <div className="w-full flex items-center justify-center">
                         <div className="w-11/12 rounded-lg shadow-lg mt-14">
                             <div className="relative mx-auto bg-white p-8 border border-solid drop-shadow">
                                 {
-                                    quizSelector.isStarted ? (
+                                    quizSelector?.isStarted ? (
                                         <QuizUi quizData={quizData} setQuizData={setQuizData}/>
                                     ) : (
                                         <div className="flex flex-col items-center justify-center gap-6">
@@ -76,7 +121,7 @@ export default function Home() {
                             </div>
                         </div>
                     </div>
-                ) : (push('/login'))
+                )
             }
         </>
     );

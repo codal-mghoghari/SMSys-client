@@ -1,21 +1,27 @@
 export type jwtUserData = {
-    userData?: RegisteredUserData,
+    createdAt?: string,
+    email?: string,
+    entryTest?: number
+    first_name?: string,
+    id?: string,
+    last_name?: string,
+    updatedAt?: string,
+    user_role?: number,
     iat?: number,
     exp?: number
 }
 
 export type RegisteredUserData = {
     createdAt?: string,
-    date_of_birth?: null | string,
     email?: string,
+    entryTest?: number | boolean
+    exp?: number,
     first_name?: string,
-    full_name: string,
-    id?: number,
-    is_deleted?: number,
+    iat?: number,
+    id?: string,
     last_name?: string,
-    password?: string,
-    role?: number,
     updatedAt?: string,
+    user_role?: number,
     optedCourses?: {
         course: string[],
     },

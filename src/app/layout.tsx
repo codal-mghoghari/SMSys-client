@@ -1,7 +1,7 @@
 import type {Metadata} from "next";
 import {Inter} from "next/font/google";
 import "./globals.css";
-import React from "react";
+import React, {Suspense} from "react";
 import ReduxProvider from "@/Providers/ReduxProvider";
 import {ToastContainer} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
@@ -10,6 +10,7 @@ const inter = Inter({subsets: ["latin"]});
 
 
 import type {Viewport} from 'next'
+import Loading from "@/app/loading";
 
 export const viewport: Viewport = {
     width: 'device-width',
@@ -45,8 +46,10 @@ export default function RootLayout({
         <html lang="en">
         <body className={inter.className}>
         <ReduxProvider>
-            <ToastContainer/>
-            {children}
+            <Suspense fallback={<Loading/>}>
+                <ToastContainer/>
+                {children}
+            </Suspense>
         </ReduxProvider>
         </body>
         </html>

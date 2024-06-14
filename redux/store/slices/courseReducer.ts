@@ -2,10 +2,10 @@ import {createSlice} from "@reduxjs/toolkit"
 
 export type coursesType = {
     courses: {
-        defaultCourses?: [
+        defaultCourses: [
             {
                 id?: string,
-                course?: string,
+                course_name?: string,
                 createdAt?: string,
                 updatedAt?: string,
             }

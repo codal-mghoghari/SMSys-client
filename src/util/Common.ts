@@ -33,11 +33,11 @@ export const getQuestionsByType = (allData: QuizDataType, argsQuestionType: stri
 export const notifySuccess = (args: string) => toast.success(args, {
     toastId: "toast-success_notification",
     position: "top-right",
-    autoClose: 3000,
+    autoClose: 2000,
     hideProgressBar: true,
     closeOnClick: true,
     pauseOnHover: true,
-    draggable: true,
+    draggable: false,
     theme: "colored",
     transition: Slide,
 });
@@ -45,11 +45,11 @@ export const notifySuccess = (args: string) => toast.success(args, {
 export const notifyError = (args: string) => toast.error(args, {
     toastId: "toast-error_notification",
     position: "top-right",
-    autoClose: 3000,
+    autoClose: 2000,
     hideProgressBar: true,
     closeOnClick: true,
     pauseOnHover: true,
-    draggable: true,
+    draggable: false,
     theme: "colored",
     transition: Slide,
 });

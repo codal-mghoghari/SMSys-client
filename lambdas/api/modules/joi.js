@@ -40,7 +40,7 @@ const validateRegisterJoi = (request) => {
 
 const validateAddCourseJoi = (request) => {
     const joiSchema = Joi.object({
-        course_name: Joi
+        id: Joi
             .string()
             .required(),
     })

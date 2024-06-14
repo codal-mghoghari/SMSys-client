@@ -1,6 +1,6 @@
 import {iGrades} from "@/interfaces/iGrades";
 import {StringIndexable} from "@/util/Util";
-import {AnswersType, QuizDataType} from "@/interfaces/iQuizData";
+import {AnswersType, EachAnswersType, QuizDataType, QuizEachOptionsType} from "@/interfaces/iQuizData";
 import {checkOptionIsCorrect} from "@/controller/quizController";
 import {getQuestionsByType} from "@/util/Common";
 
@@ -19,18 +19,18 @@ const genRecommendedCourses = async (props: iGrades) => {
     const returnRecommendedCourses: string[] = []
 
     if (Object.keys(answeredQuestions).length > 0) {
-
         for (const question of allQuestionsData) {
             const index: number = allQuestionsData.indexOf(question);
-            let selectedOption = question.Answers?.find((ans) => ans.question_id == answeredQuestionsKeys[index] && props.answeredSelector[answeredQuestionsKeys[index]] === ans.option)
+            let selectedOption = question.Answers?.find((ans: QuizEachOptionsType) => answeredQuestionsKeys.includes(ans?.question_id.toString()) && answeredQuestions[ans?.question_id!.toString()] === ans?.option_description)
             if (selectedOption && index !== -1) {
                 await checkOptionIsCorrect(selectedOption?.id)
                     .then((res) => {
-                        if (res?.data?.length === 1) { // Returns 1 if its correct option
-                            answeredList.push(res?.data[0])
+                        if (res?.totalLength === 1 && res?.data.isCorrect === 1) { // Only adding if its isCorrect = true
+                            answeredList.push(res?.data)
                         }
                     })
-                    .catch((err) => console.error("checkOptionIsCorrect: ", err))
+                    .catch((err) => console.log("checkOptionIsCorrect: ", err))
+
             }
         }
 
@@ -48,7 +48,7 @@ const genRecommendedCourses = async (props: iGrades) => {
                     }
                 }
             })
-
+            
             Object.keys(answeredTypes).map((item) => {
                 let key = item
                 let val = answeredTypes[item]
@@ -58,9 +58,19 @@ const genRecommendedCourses = async (props: iGrades) => {
                 }
             })
 
+            allQuestionsData.filter((question) => {
+                if (!(question?.id! in answeredQuestions)) {
+                    if (!returnRecommendedCourses.includes(question?.question_type!)) {
+                        returnRecommendedCourses.push(question?.question_type!)
+                    }
+                    return false
+                }
+            })
+
+            return returnRecommendedCourses
         }
 
-        return returnRecommendedCourses
+        return []
     }
 
     return []

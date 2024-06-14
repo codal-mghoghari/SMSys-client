@@ -10,45 +10,31 @@ const loginUser = async (request) => {
         if (userData?.totalLength !== 0) {
             const userAuthData = await getRecordsByKey('UserAuth', null, 1, 'userId', userData?.data?.id, "id, userId, user_token, expiresAt", false)
             if (request.body?.password === userData?.data?.password) {
-                let isExpired = userAuthData.totalLength !== 0 ? checkTokenExpired(userAuthData?.data?.user_token) : true
-                if (isExpired) {
-                    delete userData?.data?.password
-                    const token = jwt.sign(
-                        {...userData?.data},
-                        process.env.SECRETKEY,
-                        {expiresIn: "1d"} // After 1 day, it will expire
-                    );
-                    if (userAuthData.data && userAuthData.totalLength !== 0) {
-                        // If already existing data, just update the row
-                        await updateData('UserAuth', "id", userAuthData?.data?.id, 'user_token', token)
-                    } else {
-                        // If no data exist, create one
-                        await insertData('UserAuth', {
-                            userId: userData?.data?.id,
-                            user_token: token
-                        }, true, true)
-                    }
-                    return sendCustomHttpResponse(
-                        {
-                            status: 200,
-                            message: "Logged-in successfully!",
-                            data: token
-                        },
-                        {},
-                        200
-                    )
+                delete userData?.data?.password
+                const token = jwt.sign(
+                    {...userData?.data},
+                    process.env.SECRETKEY,
+                    {expiresIn: "1d"} // After 1 day, it will expire
+                );
+                if (userAuthData.data && userAuthData.totalLength !== 0 && userAuthData?.data?.id) {
+                    // If already existing data, just update the row
+                    await updateData('UserAuth', "id", userAuthData?.data?.id, 'user_token', token)
                 } else {
-                    return sendCustomHttpResponse(
-                        {
-                            status: 200,
-                            message: "Logged-in successfully!",
-                            data: userAuthData?.data?.user_token
-                        },
-                        {},
-                        200
-                    )
+                    // If no data exist, create one
+                    await insertData('UserAuth', {
+                        userId: userData?.data?.id,
+                        user_token: token
+                    }, true, true)
                 }
-
+                return sendCustomHttpResponse(
+                    {
+                        status: 200,
+                        message: "Logged-in successfully!",
+                        data: token
+                    },
+                    {},
+                    200
+                )
             }
             return sendCustomHttpResponse(
                 {

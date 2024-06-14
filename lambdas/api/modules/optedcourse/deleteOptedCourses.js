@@ -2,13 +2,10 @@ const {getRecordsByKey, deleteDataByPartitionKey} = require("../db/dynamodb");
 const {validateAddCourseJoi} = require("../joi");
 const deleteOptedCourses = async (request) => {
     try {
-        const userId = request?.pathParams?.id;
-        const requestBody = request?.body;
-        const validatedUserData = validateAddCourseJoi(request)
-        const courseTableData = await getRecordsByKey('OptedCourses', null, null, 'userId', userId, "id, course_name, userId, createdAt, updatedAt", true, true, false, "userId = :value AND course_name = :course",
+        const courseId = request?.pathParams?.id;
+        const courseTableData = await getRecordsByKey('OptedCourses', null, null, 'courseId', courseId, "id, course_name, userId, createdAt, updatedAt", true, true, false, "courseId = :id",
             {
-                ':value': String(userId),
-                ":course": String(validatedUserData.course_name)
+                ":id": String(courseId)
             }
         )
         if (courseTableData?.data?.length === 0) {
@@ -22,7 +19,7 @@ const deleteOptedCourses = async (request) => {
         return {
             status: 200,
             message: "unOpted Course Successfully!",
-            data: validatedUserData.course_name,
+            data: courseId,
         }
     } catch (error) {
         console.error(">>> Delete deleteOptedCourses Error:", error)

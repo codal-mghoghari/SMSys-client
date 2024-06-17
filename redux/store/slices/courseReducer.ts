@@ -1,5 +1,19 @@
 import {createSlice} from "@reduxjs/toolkit"
 
+export type DefaultCourseType = {
+    id?: string,
+    course_name?: string,
+    createdAt?: string,
+    updatedAt?: string,
+}[]
+
+export type DefaultCourseObj = {
+    id?: string,
+    course_name?: string,
+    createdAt?: string,
+    updatedAt?: string,
+}
+
 export type coursesType = {
     courses: {
         defaultCourses: [

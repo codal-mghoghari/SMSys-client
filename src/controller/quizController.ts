@@ -7,7 +7,7 @@ axios.defaults.headers.common.Authorization = `Bearer ${getCookie("token")}`
 // axios.defaults.headers.common["Access-Control-Allow-Origin"] = "*"
 
 const Client = axios.create({
-    withCredentials: true,
+    // withCredentials: true,
 })
 
 

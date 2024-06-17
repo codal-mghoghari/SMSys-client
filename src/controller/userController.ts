@@ -1,5 +1,5 @@
 import axios, {AxiosResponse} from "axios";
-import {getCookie} from "cookies-next";
+import {getCookie} from "@/util/Common";
 
 axios.defaults.headers.common.Authorization = `Bearer ${getCookie("token")}`
 // axios.defaults.headers.common.Accept = "application/json"
@@ -8,7 +8,7 @@ axios.defaults.headers.common.Authorization = `Bearer ${getCookie("token")}`
 // axios.defaults.headers.common["Access-Control-Allow-Credentials"] = true
 
 const Client = axios.create({
-    withCredentials: true,
+    // withCredentials: true,
 })
 
 export const registerUser = async (first_name: string, last_name: string, email: string, password: string) => {
@@ -59,6 +59,25 @@ export const updateUser = async (bool: boolean, id: string) => {
     return await Client.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/${id}`, {
         entryTest: bool
     })
+        .then(
+            (response: AxiosResponse) => {
+                return response.data
+            }
+        )
+        .catch((error) => {
+            if (error?.response) {
+                if (error?.response?.data) {
+                    return error?.response?.data
+                }
+                return error?.response
+            }
+            return error
+        })
+}
+
+
+export const getUser = async (id?: string) => {
+    return await Client.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/${id}`)
         .then(
             (response: AxiosResponse) => {
                 return response.data

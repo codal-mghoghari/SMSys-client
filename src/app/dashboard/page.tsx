@@ -1,9 +1,9 @@
 "use client";
 
 import {useRouter} from "next/navigation";
-import {jwtUserData, RegisteredUserData} from "@/interfaces/iRegisterUser";
+import {RegisteredUserData} from "@/interfaces/iRegisterUser";
 import {jwtDecode} from "jwt-decode";
-import {capitalizeEachWord, createCookie, getCookie} from "@/util/Common";
+import {capitalizeEachWord, createCookie, getCookie, getCourseById} from "@/util/Common";
 import {Aside} from "@/components/Aside";
 import {DashboardContent} from "@/components/DashboardContent";
 import {ChangeEvent, MouseEventHandler, useEffect, useRef, useState} from "react";
@@ -11,7 +11,7 @@ import {
     addUserCourse,
     deleteUserCourse,
     getAllCoursesWithoutPagination,
-    getUserOptedCourses
+    getUserOptedCourses, getUserRecommCourses
 } from "@/controller/courseController";
 import {notifySuccess, notifyError} from "@/util/Common";
 import {useDispatch, useSelector} from "react-redux";
@@ -20,15 +20,15 @@ import {_setUser, _setUserCourses, _setUserEntryTest} from "../../../redux/store
 import defaultConfig from "../../configuration/defaultConfig.json"
 import "./page.css"
 import {StringIndexable} from "@/util/Util";
-import {_setDefaultCourses, coursesType} from "../../../redux/store/slices/courseReducer";
+import {_setDefaultCourses, _setRecommCourses, coursesType} from "../../../redux/store/slices/courseReducer";
 import Image from "next/image";
+import {getUser} from "@/controller/userController";
 
 export default function Page() {
     //Global preload
     const isLoggedIn = !!getCookie('token');
     const userDataSelector: RegisteredUserData = useSelector((state: rootStateType) => state.user.loggedInUserData);
     const courseDataSelector: coursesType = useSelector((state: rootStateType) => state.course);
-    const entryTest: boolean = useSelector((state: rootStateType) => state.user.entryTest);
 
     //Local States
     const [activeElem, setActiveElem] = useState("user");
@@ -41,7 +41,6 @@ export default function Page() {
 
     //Variables
     const {push} = useRouter();
-    const userData: jwtUserData = isLoggedIn ? jwtDecode(getCookie('token')!) : {}
     const [prevOptedCourses, setPrevOptedCourses] = useState(optedCourses);
     const saveOptedCourses = typeof window !== "undefined" ? document?.getElementById('saveOptedCourses') as HTMLElement : null // TODO - Fix the Console Error - ReferenceError: location is not defined
     const dispatch = useDispatch();
@@ -92,7 +91,7 @@ export default function Page() {
                 for (const opt of opted) {
                     let optedCourseUUID = getDefaultCourseUUIDByName(opt)
                     if (optedCourseUUID) {
-                        await addUserCourse(userData?.id, optedCourseUUID?.id).then(res => {
+                        await addUserCourse(userDataSelector?.id, optedCourseUUID?.id).then(res => {
                             if (res?.data) {
                                 notifySuccess(res?.message)
                                 dispatch(_setUserCourses(optedCourses))
@@ -158,7 +157,7 @@ export default function Page() {
     }
 
     useEffect(() => {
-        if (!entryTest) { // If user is logged-in but has not given the entry test yet, shall be redirected to EntryTest page.
+        if (!userDataSelector.entryTest) {
             push('/entrytest')
         }
         if (typeof window !== undefined) {
@@ -230,15 +229,15 @@ export default function Page() {
 
                                         <div className="flex flex-col items-end ">
                                             <div
-                                                className="text-md font-medium">{capitalizeEachWord(`${userDataSelector.first_name} ${userDataSelector.last_name}`)}</div>
+                                                className="text-md font-medium">{capitalizeEachWord(`${userDataSelector?.first_name} ${userDataSelector?.last_name}`)}</div>
                                             <div
-                                                className="text-sm font-regular">{userDataSelector.user_role === 0 ? 'Admin' : 'Student'}</div>
+                                                className="text-sm font-regular">{userDataSelector?.user_role === 0 ? 'Admin' : 'Student'}</div>
                                         </div>
 
                                         <div
                                             className="h-10 w-10 z-20 rounded-full cursor-pointer bg-gray-200 border-2 border-gray-500">
                                             <Image src="/avatar.png" height="50" width="50" alt="pfp"
-                                                 className="rounded-full z-10"/>
+                                                   className="rounded-full z-10"/>
                                         </div>
                                     </div>
                                 </header>

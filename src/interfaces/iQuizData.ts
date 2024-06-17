@@ -47,13 +47,6 @@ export type QuizEachOptionsType = {
     question_type: String,
 }
 
-export type EachQuizDataType = {
-    id?: string,
-    question_type?: string,
-    question?: string,
-    Answers?: QuizOptionsType
-}
-
 
 export interface iQuizData {
     id?: string,

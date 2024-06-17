@@ -1,21 +1,19 @@
 "use client";
-import {Suspense, useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {Formik, FormikValues} from "formik";
-import {LoginSchema, LoginType} from "@/schema/LoginSchema";
-import {RegisterSchema, RegisterType} from "@/schema/RegisterSchema";
+import {LoginSchema} from "@/schema/LoginSchema";
+import {RegisterSchema} from "@/schema/RegisterSchema";
 import {loginUser, registerUser} from "@/controller/userController";
 import Image from "next/image";
 import {useRouter} from 'next/navigation';
 import {notifySuccess, notifyError, createCookie, getCookie} from "@/util/Common";
-import {useDispatch, useSelector} from "react-redux";
-import {_setUser, _setUserCourses, _setUserEntryTest, loggedUserData} from "../../../redux/store/slices/userReducer";
+import {useDispatch} from "react-redux";
+import {_setUser, _setUserEntryTest} from "../../../redux/store/slices/userReducer";
 import './page.css'
 import {RegisteredUserData} from "@/interfaces/iRegisterUser";
-import {rootStateType} from "../../../redux/store/mainStore";
 import {decode} from "jsonwebtoken";
-import {getAllCoursesWithoutPagination, getUserOptedCourses} from "@/controller/courseController";
-import {_setDefaultCourses} from "../../../redux/store/slices/courseReducer";
 import Loading from "@/app/loading";
+import {revalidatePath} from "next/cache";
 
 export default function Page() {
     // States
@@ -24,10 +22,9 @@ export default function Page() {
     const [currentUser, setCurrentUser] = useState<RegisteredUserData | null>(null);
 
     // Variables
-    const {push} = useRouter();
+    const {push, refresh} = useRouter();
     const dispatch = useDispatch();
     const isLoggedIn = !!(getCookie('token'))
-    const userDataSelector: RegisteredUserData = useSelector((state: rootStateType) => state.user.loggedInUserData);
 
     const handleSignUp = () => {
         const loginContainer = (document.getElementById("loginContainer") as HTMLElement);
@@ -64,28 +61,12 @@ export default function Page() {
         }
     }
 
-    const getDefaultData = async () => {
-        // await getUserOptedCourses(userDataSelector?.id!).then(response => {
-        //     if (response?.data) {
-        //         let res = response?.data?.map((elm: any) => elm?.course)
-        //         dispatch(_setUserCourses({course: res}))
-        //     } else {
-        //         dispatch(_setUserCourses({course: []}))
-        //     }
-        // }).catch(error => console.error("getUserOptedCourses: ", error))
-        await getAllCoursesWithoutPagination().then(response => {
-            dispatch(_setDefaultCourses(response?.data))
-        }).catch(error => console.log("getAllCoursesWithoutPagination error:", error))
-    }
-
     const validateLogin = async (values: FormikValues) => {
         try {
             const {email, password} = values
             setIsLoading(true)
             await loginUser(email, password).then(async (res) => {
                 if (res?.data && res?.data?.data) {
-                    // Get defaults
-                    await getDefaultData()
                     let tokenDecode: any = decode(res?.data?.data)
                     let date = new Date(tokenDecode?.exp * 1000)
                     delete tokenDecode?.iat
@@ -122,12 +103,14 @@ export default function Page() {
     }
 
     useEffect(() => {
-        if (isLoggedIn && currentUser?.entryTest) {
-            push('/dashboard')
-        } else if (isLoggedIn && !currentUser?.entryTest) {
-            push('entrytest')
-        } else {
-            push('/login')
+        if (currentUser) {
+            if (isLoggedIn && currentUser?.entryTest) {
+                push('/dashboard')
+            } else if (isLoggedIn && !currentUser?.entryTest) {
+                push('entrytest')
+            } else {
+                push('/login')
+            }
         }
     }, [currentUser]);
 

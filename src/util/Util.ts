@@ -1,7 +1,3 @@
-import {getAllCoursesWithoutPagination, getUserOptedCourses} from "@/controller/courseController";
-import {_setUserCourses} from "../../redux/store/slices/userReducer";
-import {_setDefaultCourses} from "../../redux/store/slices/courseReducer";
-
 export type StringIndexable = { [x: string]: any; }
 export function getKeysWithValueTrue(object: { [x: string]: any; }) {
     return Object.keys(object).filter(key => object[key] === true).map((key) => {

@@ -16,11 +16,15 @@ import {
     QuizQuestionsType
 } from "@/interfaces/iQuizData";
 import Loading from "@/app/loading";
+import {coursesType} from "../../../redux/store/slices/courseReducer";
+import {RegisteredUserData} from "@/interfaces/iRegisterUser";
 
 export default function Home() {
     //Global
+    const isLoggedIn = !!getCookie('token');
     const quizSelector: StringIndexable = useSelector((state: rootStateType) => state.quiz.quizData);
-    const entryTest: boolean = useSelector((state: rootStateType) => state.user.entryTest);
+    const userDataSelector: RegisteredUserData = useSelector((state: rootStateType) => state.user.loggedInUserData);
+    const courseDataSelector: coursesType = useSelector((state: rootStateType) => state.course);
 
     //Variables
     const dispatch = useDispatch();
@@ -51,7 +55,7 @@ export default function Home() {
     }
 
     useEffect(() => {
-        if (entryTest) {
+        if (userDataSelector.entryTest) {
             push('/dashboard')
         } else {
             setIsLoading(true)

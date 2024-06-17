@@ -11,6 +11,8 @@ const inter = Inter({subsets: ["latin"]});
 
 import type {Viewport} from 'next'
 import Loading from "@/app/loading";
+import DataProvider from "@/Providers/DataProvider";
+import {revalidatePath} from "next/cache";
 
 export const viewport: Viewport = {
     width: 'device-width',
@@ -42,15 +44,19 @@ export default function RootLayout({
                                    }: Readonly<{
     children: React.ReactNode;
 }>) {
+    revalidatePath('/', "layout")
     return (
         <html lang="en">
         <body className={inter.className}>
-        <ReduxProvider>
-            <Suspense fallback={<Loading/>}>
-                <ToastContainer/>
-                {children}
-            </Suspense>
-        </ReduxProvider>
+        <Suspense fallback={<Loading/>}>
+            <ReduxProvider>
+                <DataProvider>
+                    <ToastContainer/>
+                    {children}
+                </DataProvider>
+            </ReduxProvider>
+        </Suspense>
+
         </body>
         </html>
     );

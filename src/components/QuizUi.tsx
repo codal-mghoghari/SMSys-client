@@ -12,23 +12,23 @@ import {
     _removeUnAnsweredQuestions, _resetUnAnsweredQuestions
 } from "../../redux/store/slices/quizReducer";
 import {rootStateType} from "../../redux/store/mainStore";
-import {getCookie, notifyError, notifySuccess} from "@/util/Common";
+import {getCourseByName, notifyError, notifySuccess} from "@/util/Common";
 import SubmitDialog from "@/components/SubmitDialog";
-import {jwtUserData} from "@/interfaces/iRegisterUser";
-import {jwtDecode} from "jwt-decode";
+import {RegisteredUserData} from "@/interfaces/iRegisterUser";
 import {useRouter} from "next/navigation";
 import genRecommendedCourses from "@/util/genRecommendedCourses";
-import {_setRecommCourses, coursesType} from "../../redux/store/slices/courseReducer";
 import {
-    AnswersType,
-    EachAnswersType,
-    EachQuizDataType,
+    _setRecommCourses,
+    coursesType,
+    DefaultCourseObj,
+} from "../../redux/store/slices/courseReducer";
+import {
     iQuizData,
     QuizDataType,
-    QuizEachQuestionType
 } from "@/interfaces/iQuizData";
 import {updateUser} from "@/controller/userController";
 import {_setUserEntryTest} from "../../redux/store/slices/userReducer";
+import {addUserRecommCourse} from "@/controller/courseController";
 
 
 export const QuizUi = (props: {
@@ -36,6 +36,7 @@ export const QuizUi = (props: {
     setQuizData: any
 }) => {
     //Redux
+    const userDataSelector: RegisteredUserData = useSelector((state: rootStateType) => state.user.loggedInUserData);
     const courseDataSelector: coursesType = useSelector((state: rootStateType) => state.course);
 
     //Global
@@ -53,7 +54,6 @@ export const QuizUi = (props: {
     //Variables
     const quizData = props.quizData
     const {push} = useRouter();
-    const userData: jwtUserData = getCookie('token') ? jwtDecode(getCookie('token')!) : {};
     const dispatch = useDispatch();
 
     const Questions = props?.quizData?.map((quiz) => {
@@ -163,8 +163,7 @@ export const QuizUi = (props: {
 
     const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        let defCourses = courseDataSelector?.courses?.defaultCourses
-        await updateUser(true, userData?.id!).then(async res => {
+        await updateUser(true, userDataSelector?.id!).then(async res => {
             if (res?.data) {
                 await genRecommendedCourses({
                     answeredSelector, unAnsweredSelector, quizData
@@ -190,6 +189,29 @@ export const QuizUi = (props: {
             push('/dashboard')
         })
     }
+
+    const addRecommCourses = async (course: DefaultCourseObj) => {
+        await addUserRecommCourse(course?.id?.toString(), userDataSelector?.id!).then((res) => {
+            if (!res?.data && !res?.data?.data) {
+                notifyError(res?.message)
+            }
+        }).catch((err) => {
+            console.log("addUserRecommCourse error: ", err)
+        })
+    }
+
+    useEffect(() => {
+        const defCourses = courseDataSelector?.courses?.defaultCourses
+
+        if (recommCourses.length > 0) {
+            recommCourses?.forEach((recommendedCourse) => {
+                let courseObj = getCourseByName(defCourses, recommendedCourse.toString())
+                if (Object.keys(courseObj).length > 0) {
+                    addRecommCourses(courseObj)
+                }
+            })
+        }
+    }, [recommCourses]);
 
     return (
         <>

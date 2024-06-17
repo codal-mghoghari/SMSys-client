@@ -1,5 +1,6 @@
 import {Slide, toast} from "react-toastify";
 import {QuizDataType} from "@/interfaces/iQuizData";
+import {DefaultCourseObj, DefaultCourseType} from "../../redux/store/slices/courseReducer";
 
 export function createCookie(username: string, value: string, minutes: number) {
     let expires, date;
@@ -27,6 +28,25 @@ export const getQuestionsByType = (allData: QuizDataType, argsQuestionType: stri
     return allData.filter((data) => {
         return data.question_type === argsQuestionType
     })
+}
+
+export const getCourseByName = (defaultCourses: DefaultCourseType, courseName: string) => {
+    let returnObj = {}
+    defaultCourses?.map((eachCourse) => {
+        if (eachCourse?.course_name?.toLowerCase() === courseName?.toLowerCase()) {
+            returnObj = eachCourse
+        }
+    })
+    return returnObj
+}
+
+export const getCourseById = (defaultCourses: DefaultCourseType, courseId: string) => {
+    let courseArr = defaultCourses?.map((eachCourse: DefaultCourseObj) => {
+        if (eachCourse?.id?.toLowerCase() === courseId?.toString().toLowerCase()) {
+            return eachCourse
+        }
+    })
+    return Object.assign({}, ...courseArr)
 }
 
 
